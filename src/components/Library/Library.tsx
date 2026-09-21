@@ -312,7 +312,13 @@ export default function Library() {
                   key={deckId}
                   type="button"
                   className={`${styles.deckButton} ${deckId % 2 === 0 ? styles.deckButtonA : styles.deckButtonB}`}
-                  onClick={() => loadTrackToDeck(deckId, track)}
+                  onClick={() => {
+                    loadTrackToDeck(deckId, track)
+                    // Close the compact-mode drawer so the deck you just loaded is
+                    // immediately visible (no-op / harmless at desktop sizes where
+                    // the track list is always inline and this state isn't used for layout).
+                    setIsTrackListOpen(false)
+                  }}
                   title={`Load on deck ${deckId + 1}`}
                 >
                   {deckId + 1}
