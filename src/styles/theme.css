@@ -1,0 +1,72 @@
+/* Shared design tokens for the whole app — a dark, club-mixer aesthetic. */
+:root {
+  --color-bg: #0d0e12;
+  --color-bg-raised: #16181f;
+  --color-bg-panel: #1c1f28;
+  --color-bg-inset: #101218;
+  --color-border: #2a2e3a;
+  --color-border-strong: #3a3f4f;
+
+  --color-text: #e8e9ee;
+  --color-text-dim: #8a8fa3;
+  --color-text-faint: #565b6d;
+
+  --color-accent-a: #ff5a5f; /* deck A / channel 1+3 */
+  --color-accent-b: #37b7ff; /* deck B / channel 2+4 */
+  --color-accent-warn: #ffb648;
+  --color-accent-ok: #4ade80;
+
+  --color-waveform: #ff5a5f;
+  --color-waveform-played: #5a5e6b;
+
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
+
+  --font-mono: 'JetBrains Mono', 'SFMono-Regular', Consolas, monospace;
+  --font-ui: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-ui);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+button {
+  font-family: inherit;
+  color: inherit;
+}
+
+input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
