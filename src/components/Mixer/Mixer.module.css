@@ -1,0 +1,371 @@
+/* Mixer.module.css — shared styles for the whole Mixer folder
+   (Mixer, ChannelStrip, Crossfader, EQKnob all import this one module). */
+
+.mixer {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: var(--color-bg-panel);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  padding: 8px 10px 10px;
+  gap: 6px;
+  overflow: hidden;
+}
+
+/* ---- header row: title + deck count toggle ---- */
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex: 0 0 auto;
+}
+
+.headerTitle {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  color: var(--color-text-faint);
+}
+
+.deckCountToggle {
+  display: flex;
+  gap: 4px;
+}
+
+.deckCountBtn {
+  background: var(--color-bg-inset);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-dim);
+  font-family: var(--font-ui);
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.deckCountBtn:hover {
+  color: var(--color-text);
+}
+
+.deckCountBtnActive {
+  border-color: var(--color-text-dim);
+  color: var(--color-text);
+  background: var(--color-bg-raised);
+}
+
+/* ---- strips row: N channel strips + master strip ---- */
+
+.strips {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  gap: 6px;
+}
+
+.masterStrip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  width: 52px;
+  flex: 0 0 auto;
+  min-height: 0;
+  padding: 6px 2px 4px;
+  border-left: 1px solid var(--color-border);
+}
+
+.masterLabel {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: var(--color-text-faint);
+}
+
+.masterReadout {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-text-dim);
+}
+
+/* ---- channel strip ---- */
+
+.strip {
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 4px 6px;
+  background: var(--color-bg-raised);
+  border: 1px solid var(--color-border);
+  border-top: 2px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+}
+
+.stripAccentA {
+  border-top-color: var(--color-accent-a);
+}
+
+.stripAccentB {
+  border-top-color: var(--color-accent-b);
+}
+
+.stripAccentNeutral {
+  border-top-color: var(--color-border-strong);
+}
+
+.stripLabel {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-text-dim);
+  flex: 0 0 auto;
+}
+
+/* ---- rotary knobs (gain trim + EQ) ---- */
+
+.knobWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  flex: 0 0 auto;
+}
+
+.knob {
+  position: relative;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--color-bg-inset);
+  border: 1px solid var(--color-border);
+  cursor: ns-resize;
+  touch-action: none;
+  outline: none;
+}
+
+.knob:focus-visible {
+  border-color: var(--color-text-dim);
+}
+
+.knobDisabled {
+  opacity: 0.35;
+  pointer-events: none;
+  cursor: default;
+}
+
+.knobIndicator {
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  width: 2px;
+  height: 11px;
+  margin-left: -1px;
+  background: var(--color-text);
+  border-radius: 1px;
+  /* pivot at the knob's true center so the tip sweeps like a clock hand */
+  transform-origin: 1px 12px;
+}
+
+.knobLabel {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.04em;
+  color: var(--color-text-faint);
+}
+
+.eqStack {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 0 0 auto;
+}
+
+/* ---- crossfader assign switch (A / THRU / B) ---- */
+
+.assignGroup {
+  display: flex;
+  gap: 2px;
+  flex: 0 0 auto;
+}
+
+.assignBtn {
+  width: 21px;
+  height: 17px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  padding: 0;
+  background: var(--color-bg-inset);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-dim);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.assignBtnActive {
+  background: var(--color-bg-panel);
+  color: var(--color-text);
+  border-color: var(--color-text-dim);
+}
+
+.assignBtnA {
+  border-color: var(--color-accent-a);
+  color: var(--color-accent-a);
+}
+
+.assignBtnB {
+  border-color: var(--color-accent-b);
+  color: var(--color-accent-b);
+}
+
+/* ---- vertical channel/master fader ---- */
+
+.faderArea {
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+input[type='range'].volumeFaderInput,
+input[type='range'].masterFaderInput {
+  -webkit-appearance: none;
+  appearance: none;
+  writing-mode: vertical-lr;
+  direction: rtl;
+  width: 22px;
+  height: 100%;
+  background: transparent;
+  margin: 0;
+}
+
+input[type='range'].volumeFaderInput::-webkit-slider-runnable-track,
+input[type='range'].masterFaderInput::-webkit-slider-runnable-track {
+  width: 4px;
+  background: var(--color-border-strong);
+  border-radius: 2px;
+}
+
+input[type='range'].volumeFaderInput::-webkit-slider-thumb,
+input[type='range'].masterFaderInput::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 20px;
+  height: 13px;
+  margin-left: -8px;
+  background: var(--color-text);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  cursor: ns-resize;
+}
+
+input[type='range'].volumeFaderInput::-moz-range-track,
+input[type='range'].masterFaderInput::-moz-range-track {
+  width: 4px;
+  background: var(--color-border-strong);
+  border-radius: 2px;
+}
+
+input[type='range'].volumeFaderInput::-moz-range-thumb,
+input[type='range'].masterFaderInput::-moz-range-thumb {
+  width: 20px;
+  height: 13px;
+  background: var(--color-text);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  cursor: ns-resize;
+}
+
+/* ---- headphone cue toggle ---- */
+
+.cueBtn {
+  flex: 0 0 auto;
+  width: 100%;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.04em;
+  padding: 3px 0;
+  background: var(--color-bg-inset);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-dim);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.cueBtnActive {
+  background: var(--color-accent-warn);
+  border-color: var(--color-accent-warn);
+  color: var(--color-bg);
+}
+
+/* ---- crossfader ---- */
+
+.crossfaderRow {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 6px;
+  border-top: 1px solid var(--color-border);
+}
+
+.crossfaderLabelA {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-accent-a);
+}
+
+.crossfaderLabelB {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-accent-b);
+}
+
+input[type='range'].crossfaderInput {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 1;
+  height: 22px;
+  background: transparent;
+  margin: 0;
+}
+
+input[type='range'].crossfaderInput::-webkit-slider-runnable-track {
+  height: 4px;
+  background: var(--color-border-strong);
+  border-radius: 2px;
+}
+
+input[type='range'].crossfaderInput::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 18px;
+  height: 22px;
+  margin-top: -9px;
+  background: var(--color-text);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  cursor: ew-resize;
+}
+
+input[type='range'].crossfaderInput::-moz-range-track {
+  height: 4px;
+  background: var(--color-border-strong);
+  border-radius: 2px;
+}
+
+input[type='range'].crossfaderInput::-moz-range-thumb {
+  width: 18px;
+  height: 22px;
+  background: var(--color-text);
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm);
+  cursor: ew-resize;
+}

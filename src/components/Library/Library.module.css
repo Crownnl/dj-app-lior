@@ -1,0 +1,279 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  background: var(--color-bg-panel);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.legalNote {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 6px 12px;
+  font-size: 10px;
+  line-height: 1.4;
+  color: var(--color-text-faint);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.importRow {
+  flex-shrink: 0;
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.importGroup {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 8px 10px;
+  border-right: 1px solid var(--color-border);
+  transition: background-color 0.1s ease, border-color 0.1s ease;
+}
+
+.importGroup:last-child {
+  border-right: none;
+}
+
+.dragActive {
+  background: var(--color-bg-inset);
+  outline: 1px dashed var(--color-accent-b);
+  outline-offset: -3px;
+}
+
+.groupLabel {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--color-text-dim);
+}
+
+.hiddenInput {
+  display: none;
+}
+
+.dropHint {
+  font-size: 10px;
+  color: var(--color-text-faint);
+}
+
+.inlineForm {
+  display: flex;
+  gap: 4px;
+  width: 100%;
+}
+
+.textInput {
+  flex: 1;
+  min-width: 0;
+  height: 24px;
+  padding: 0 6px;
+  font-size: 11px;
+  color: var(--color-text);
+  background: var(--color-bg-inset);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.textInput:focus {
+  outline: none;
+  border-color: var(--color-border-strong);
+}
+
+.smallButton {
+  flex-shrink: 0;
+  height: 24px;
+  padding: 0 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--color-text);
+  background: var(--color-bg-inset);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.smallButton:not(:disabled):hover {
+  background: var(--color-bg-raised);
+  border-color: var(--color-border-strong);
+}
+
+.smallButton:disabled {
+  color: var(--color-text-faint);
+  cursor: default;
+  opacity: 0.6;
+}
+
+.errorNote {
+  font-size: 10px;
+  line-height: 1.4;
+  color: var(--color-accent-a);
+}
+
+.trackList {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 4px 8px;
+  display: flex;
+  flex-direction: column;
+}
+
+.emptyState {
+  margin: 0;
+  padding: 16px 4px;
+  text-align: center;
+  font-size: 12px;
+  color: var(--color-text-faint);
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 4px;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.row:last-child {
+  border-bottom: none;
+}
+
+.artwork {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--color-bg-inset);
+}
+
+.artworkImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.artworkPlaceholder {
+  width: 100%;
+  height: 100%;
+  background: var(--color-bg-inset);
+  border: 1px solid var(--color-border);
+}
+
+.info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.trackTitle {
+  font-size: 12px;
+  color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.trackArtist {
+  font-size: 10px;
+  color: var(--color-text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sourceBadge {
+  flex-shrink: 0;
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--color-text-dim);
+  background: var(--color-bg-inset);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 2px 5px;
+}
+
+.bpm {
+  flex-shrink: 0;
+  width: 56px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-dim);
+  text-align: right;
+}
+
+.duration {
+  flex-shrink: 0;
+  width: 36px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--color-text-dim);
+  text-align: right;
+}
+
+.deckButtons {
+  flex-shrink: 0;
+  display: flex;
+  gap: 4px;
+}
+
+.deckButton {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  background: var(--color-bg-inset);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.deckButton:hover {
+  background: var(--color-bg-raised);
+}
+
+.deckButtonA {
+  color: var(--color-accent-a);
+  border-color: var(--color-accent-a);
+}
+
+.deckButtonB {
+  color: var(--color-accent-b);
+  border-color: var(--color-accent-b);
+}
+
+.removeButton {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  line-height: 1;
+  color: var(--color-text-faint);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.removeButton:hover {
+  color: var(--color-accent-a);
+}
