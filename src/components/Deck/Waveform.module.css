@@ -3,7 +3,7 @@
   width: 100%;
   height: 72px;
   border-radius: var(--radius-sm);
-  background: var(--color-bg-inset);
+  background: var(--color-wave-track);
   border: 1px solid var(--color-border);
   cursor: pointer;
   overflow: hidden;
@@ -20,6 +20,7 @@
   display: flex;
   flex-direction: column;
   gap: 4px;
+  min-height: 0;
 }
 
 .fallback {
@@ -27,7 +28,7 @@
   width: 100%;
   height: 72px;
   border-radius: var(--radius-sm);
-  background: var(--color-bg-inset);
+  background: var(--color-wave-track);
   border: 1px solid var(--color-border);
   cursor: pointer;
   overflow: hidden;
@@ -39,12 +40,25 @@
   top: 0;
   left: 0;
   bottom: 0;
-  background: var(--color-waveform);
-  opacity: 0.55;
+  background: var(--color-wave-mid);
+  opacity: 0.5;
 }
 
 .caption {
   font-size: 11px;
   color: var(--color-text-faint);
   text-align: center;
+}
+
+/* Compact / phone-landscape: the deck panel only budgets ~40px for the whole
+   waveform, so shrink it and its caption without ever letting it clip. */
+@media (max-height: 480px) {
+  .waveform,
+  .fallback {
+    height: 40px;
+  }
+
+  .caption {
+    font-size: 9px;
+  }
 }

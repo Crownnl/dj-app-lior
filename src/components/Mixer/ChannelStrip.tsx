@@ -5,7 +5,7 @@ import EQKnob from './EQKnob'
 import styles from './Mixer.module.css'
 
 const ASSIGN_OPTIONS: CrossfaderAssign[] = ['A', 'THRU', 'B']
-const GAIN_DISABLED_TITLE = 'Gain trim niet beschikbaar voor streaming-bronnen (Spotify/SoundCloud staan geen ruwe audiotoegang toe)'
+const GAIN_DISABLED_TITLE = "Gain trim unavailable for streaming sources (Spotify/SoundCloud don't allow raw audio access)"
 const MIN_GAIN = 0
 const MAX_GAIN = 2
 
@@ -17,8 +17,8 @@ function assignButtonClass(option: CrossfaderAssign, active: CrossfaderAssign): 
 }
 
 function assignTitle(option: CrossfaderAssign, deckNumber: number): string {
-  if (option === 'THRU') return `Kanaal ${deckNumber} altijd hoorbaar (THRU, geen crossfade)`
-  return `Wijs kanaal ${deckNumber} toe aan zijde ${option}`
+  if (option === 'THRU') return `Channel ${deckNumber} always audible (THRU, no crossfade)`
+  return `Assign channel ${deckNumber} to side ${option}`
 }
 
 export default function ChannelStrip({ deckId }: { deckId: DeckId }) {
@@ -77,7 +77,7 @@ export default function ChannelStrip({ deckId }: { deckId: DeckId }) {
         <EQKnob deckId={deckId} band="low" />
       </div>
 
-      <div className={styles.assignGroup} role="group" aria-label="Crossfader toewijzing">
+      <div className={styles.assignGroup} role="group" aria-label="Crossfader assignment">
         {ASSIGN_OPTIONS.map((option) => (
           <button
             key={option}
@@ -100,7 +100,7 @@ export default function ChannelStrip({ deckId }: { deckId: DeckId }) {
           step={0.01}
           value={deck.volume}
           onChange={(e) => setDeckVolume(deckId, Number(e.target.value))}
-          aria-label={`Volume kanaal ${deckId + 1}`}
+          aria-label={`Channel ${deckId + 1} volume`}
         />
       </div>
 
@@ -108,7 +108,7 @@ export default function ChannelStrip({ deckId }: { deckId: DeckId }) {
         type="button"
         className={isCued ? `${styles.cueBtn} ${styles.cueBtnActive}` : styles.cueBtn}
         onClick={() => toggleCue(deckId)}
-        title="Koptelefoon cue (alleen ter indicatie, geen echte audio-routing in deze versie)"
+        title="Headphone cue (indicator only, no real audio routing in this version)"
         aria-pressed={isCued}
       >
         CUE

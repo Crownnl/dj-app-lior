@@ -97,7 +97,7 @@ function waitForDropboxReady(script: HTMLScriptElement): Promise<void> {
     }
 
     script.addEventListener('error', () => {
-      finish(() => reject(new Error('Kon het Dropbox-script niet laden. Controleer je internetverbinding.')))
+      finish(() => reject(new Error('Could not load the Dropbox script. Check your internet connection.')))
     })
 
     const startedAt = Date.now()
@@ -106,7 +106,7 @@ function waitForDropboxReady(script: HTMLScriptElement): Promise<void> {
         finish(resolve)
       } else if (Date.now() - startedAt > READY_TIMEOUT_MS) {
         finish(() =>
-          reject(new Error('Dropbox-bestandskiezer kon niet geladen worden (time-out). Probeer het later opnieuw.')),
+          reject(new Error('The Dropbox file picker could not load (timed out). Please try again later.')),
         )
       }
     }, READY_POLL_INTERVAL_MS)
@@ -123,14 +123,14 @@ export async function openDropboxChooser(): Promise<Track[]> {
   const appKey = getStoredValue(STORAGE_KEYS.dropboxAppKey).trim()
   if (!appKey) {
     throw new Error(
-      'Er is nog geen Dropbox app-key ingesteld. Vul er een in bij de instellingen (gratis aan te maken via https://www.dropbox.com/developers/apps).',
+      'No Dropbox app key has been set yet. Add one in settings (free to create at https://www.dropbox.com/developers/apps).',
     )
   }
 
   await loadDropboxChooserScript(appKey)
 
   if (!window.Dropbox) {
-    throw new Error('Dropbox is niet beschikbaar. Probeer het later opnieuw.')
+    throw new Error('Dropbox is not available. Please try again later.')
   }
 
   return new Promise<Track[]>((resolve, reject) => {
@@ -153,7 +153,7 @@ export async function openDropboxChooser(): Promise<Track[]> {
         extensions: ['.mp3', '.wav', '.m4a', '.ogg', '.flac', '.aac'],
       })
     } catch {
-      reject(new Error('Kon de Dropbox-bestandskiezer niet openen. Probeer het opnieuw.'))
+      reject(new Error('Could not open the Dropbox file picker. Please try again.'))
     }
   })
 }

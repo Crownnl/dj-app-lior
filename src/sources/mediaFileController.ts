@@ -34,7 +34,7 @@ export function createMediaFileController(deckId: DeckId, engineCtx: AudioEngine
     supportsAnalysis: true,
 
     async load(track: Track) {
-      if (!track.playUrl) throw new Error('Track heeft geen afspeelbare URL')
+      if (!track.playUrl) throw new Error('Track has no playable URL')
       audio.src = track.playUrl
       audio.load()
       if (!sourceNode) {
@@ -48,7 +48,7 @@ export function createMediaFileController(deckId: DeckId, engineCtx: AudioEngine
         }
         const onError = () => {
           cleanup()
-          reject(new Error('Kon audiobestand niet laden'))
+          reject(new Error('Could not load audio file'))
         }
         function cleanup() {
           audio.removeEventListener('canplay', onCanPlay)

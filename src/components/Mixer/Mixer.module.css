@@ -51,19 +51,30 @@
   color: var(--color-text);
 }
 
+.deckCountBtn:active {
+  transform: translateY(1px);
+  background: var(--color-bg-inset);
+}
+
 .deckCountBtnActive {
   border-color: var(--color-text-dim);
   color: var(--color-text);
   background: var(--color-bg-raised);
 }
 
-/* ---- strips row: N channel strips + master strip ---- */
+/* ---- strips row: N channel strips + master strip ----
+   overflow-x is a safety fallback, not the normal layout: strips are meant
+   to shrink-to-fit via the responsive rules below. It only engages if a
+   very narrow + compact phone still can't fit every strip after shrinking
+   (see .strip's min-width in the compact/narrow media queries). */
 
 .strips {
   display: flex;
   flex: 1;
   min-height: 0;
   gap: 6px;
+  overflow-x: auto;
+  overflow-y: hidden;
 }
 
 .masterStrip {
@@ -207,10 +218,15 @@
   cursor: pointer;
 }
 
+.assignBtn:active {
+  transform: translateY(1px);
+}
+
 .assignBtnActive {
   background: var(--color-bg-panel);
   color: var(--color-text);
   border-color: var(--color-text-dim);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .assignBtnA {
@@ -298,10 +314,15 @@ input[type='range'].masterFaderInput::-moz-range-thumb {
   cursor: pointer;
 }
 
+.cueBtn:active {
+  transform: translateY(1px);
+}
+
 .cueBtnActive {
   background: var(--color-accent-warn);
   border-color: var(--color-accent-warn);
   color: var(--color-bg);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
 /* ---- crossfader ---- */
@@ -368,4 +389,265 @@ input[type='range'].crossfaderInput::-moz-range-thumb {
   border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-sm);
   cursor: ew-resize;
+}
+
+/* ---- Narrow width (portrait phone / small tablet): more vertical room
+   than the compact case below, so shrink less aggressively. Knob labels
+   stay visible here; only the compact breakpoint hides them. ---- */
+@media (max-width: 700px) and (min-height: 481px) {
+  .mixer {
+    padding: 6px 8px 8px;
+    gap: 5px;
+  }
+
+  .headerTitle {
+    font-size: 10px;
+  }
+
+  .deckCountBtn {
+    padding: 2px 6px;
+    font-size: 9px;
+  }
+
+  .strips {
+    gap: 4px;
+  }
+
+  .masterStrip {
+    width: 42px;
+    gap: 3px;
+    padding: 4px 2px 3px;
+  }
+
+  .masterLabel {
+    font-size: 8px;
+  }
+
+  .masterReadout {
+    font-size: 9px;
+  }
+
+  .strip {
+    flex: 1 1 60px;
+    min-width: 60px;
+    gap: 4px;
+    padding: 6px 3px 5px;
+  }
+
+  .stripLabel {
+    font-size: 9px;
+  }
+
+  .knobWrap {
+    gap: 1px;
+  }
+
+  .knob {
+    width: 22px;
+    height: 22px;
+  }
+
+  .knobIndicator {
+    top: 2px;
+    height: 9px;
+    transform-origin: 1px 9px;
+  }
+
+  .knobLabel {
+    font-size: 7px;
+  }
+
+  .eqStack {
+    gap: 4px;
+  }
+
+  .assignBtn {
+    width: 19px;
+    height: 15px;
+    font-size: 8px;
+  }
+
+  input[type='range'].volumeFaderInput,
+  input[type='range'].masterFaderInput {
+    width: 18px;
+  }
+
+  input[type='range'].volumeFaderInput::-webkit-slider-thumb,
+  input[type='range'].masterFaderInput::-webkit-slider-thumb {
+    width: 16px;
+    height: 12px;
+    margin-left: -6px;
+  }
+
+  input[type='range'].volumeFaderInput::-moz-range-thumb,
+  input[type='range'].masterFaderInput::-moz-range-thumb {
+    width: 16px;
+    height: 12px;
+  }
+
+  .cueBtn {
+    padding: 2px 0;
+    font-size: 8px;
+  }
+
+  .crossfaderRow {
+    gap: 6px;
+    padding-top: 5px;
+  }
+
+  .crossfaderLabelA,
+  .crossfaderLabelB {
+    font-size: 11px;
+  }
+
+  input[type='range'].crossfaderInput {
+    height: 18px;
+  }
+
+  input[type='range'].crossfaderInput::-webkit-slider-thumb {
+    width: 16px;
+    height: 18px;
+    margin-top: -7px;
+  }
+
+  input[type='range'].crossfaderInput::-moz-range-thumb {
+    width: 16px;
+    height: 18px;
+  }
+}
+
+/* ---- Compact / phone-landscape (short viewport): the PRIMARY target.
+   The whole Mixer (header + N strips + master + crossfader) has to fit in
+   the ~170-180px total height the app shell budgets for it. Decorative
+   knob/master labels are hidden first since the knobs, faders and
+   crossfader are what actually matter for mixing — those stay fully
+   visible and draggable at every size. ---- */
+@media (max-height: 480px) {
+  .mixer {
+    padding: 3px 5px 4px;
+    gap: 3px;
+  }
+
+  .headerTitle {
+    font-size: 8px;
+  }
+
+  .deckCountToggle {
+    gap: 3px;
+  }
+
+  .deckCountBtn {
+    padding: 1px 4px;
+    font-size: 8px;
+  }
+
+  .strips {
+    gap: 3px;
+  }
+
+  .masterStrip {
+    width: 28px;
+    gap: 1px;
+    padding: 2px 1px 1px;
+  }
+
+  .masterLabel {
+    display: none;
+  }
+
+  .masterReadout {
+    font-size: 8px;
+  }
+
+  .strip {
+    flex: 1 1 44px;
+    min-width: 44px;
+    gap: 1px;
+    padding: 2px 1px 1px;
+  }
+
+  .stripLabel {
+    font-size: 7px;
+  }
+
+  .knobWrap {
+    gap: 0;
+  }
+
+  .knob {
+    width: 16px;
+    height: 16px;
+  }
+
+  .knobIndicator {
+    top: 1px;
+    height: 7px;
+    transform-origin: 1px 7px;
+  }
+
+  .knobLabel {
+    display: none;
+  }
+
+  .eqStack {
+    gap: 2px;
+  }
+
+  .assignGroup {
+    gap: 1px;
+  }
+
+  .assignBtn {
+    width: 14px;
+    height: 11px;
+    font-size: 6px;
+  }
+
+  input[type='range'].volumeFaderInput,
+  input[type='range'].masterFaderInput {
+    width: 14px;
+  }
+
+  input[type='range'].volumeFaderInput::-webkit-slider-thumb,
+  input[type='range'].masterFaderInput::-webkit-slider-thumb {
+    width: 12px;
+    height: 10px;
+    margin-left: -5px;
+  }
+
+  input[type='range'].volumeFaderInput::-moz-range-thumb,
+  input[type='range'].masterFaderInput::-moz-range-thumb {
+    width: 12px;
+    height: 10px;
+  }
+
+  .cueBtn {
+    padding: 1px 0;
+    font-size: 6px;
+  }
+
+  .crossfaderRow {
+    gap: 4px;
+    padding-top: 2px;
+  }
+
+  .crossfaderLabelA,
+  .crossfaderLabelB {
+    font-size: 9px;
+  }
+
+  input[type='range'].crossfaderInput {
+    height: 14px;
+  }
+
+  input[type='range'].crossfaderInput::-webkit-slider-thumb {
+    width: 13px;
+    height: 14px;
+    margin-top: -5px;
+  }
+
+  input[type='range'].crossfaderInput::-moz-range-thumb {
+    width: 13px;
+    height: 14px;
+  }
 }

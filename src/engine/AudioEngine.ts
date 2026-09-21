@@ -112,7 +112,7 @@ export class AudioEngine {
 
     const factory = this.controllerFactories.get(track.source)
     if (!factory) {
-      throw new Error(`Geen speler beschikbaar voor bron "${track.source}"`)
+      throw new Error(`No player available for source "${track.source}"`)
     }
     const context: AudioEngineContext = {
       audioContext: this.ctx,

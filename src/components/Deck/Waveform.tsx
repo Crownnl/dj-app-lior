@@ -4,22 +4,38 @@ import { useDjStore } from '../../store/useDjStore'
 import type { DeckId } from '../../types'
 import styles from './Waveform.module.css'
 
-const WAVEFORM_HEIGHT = 72
-const FALLBACK_WAVEFORM_COLOR = '#ff5a5f'
-const FALLBACK_PLAYED_COLOR = '#5a5e6b'
+const DEFAULT_CANVAS_HEIGHT = 72
+
+// Fallback colors used only if the CSS custom properties can't be read (e.g. in a
+// detached/test DOM). Kept in sync with the token values in src/styles/theme.css.
+const FALLBACK_TRACK_COLOR = '#1a1d26'
+const FALLBACK_LOW_COLOR = '#ff5f4a'
+const FALLBACK_MID_COLOR = '#ffd23f'
+const FALLBACK_HIGH_COLOR = '#4fd8ff'
+const FALLBACK_PLAYHEAD_COLOR = '#ffffff'
+
+// Per-band opacity for the upcoming (not-yet-played) portion: low is a wide,
+// low-opacity base, mid a medium layer, high a bright thin spike on top.
+const LOW_ALPHA = 0.55
+const MID_ALPHA = 0.85
+const HIGH_ALPHA = 1
+// Flat reduced alpha for all three bands once they're behind the playhead.
+const PLAYED_ALPHA = 0.4
+// Never draw a fully-zero-height bar so the waveform reads as continuous.
+const MIN_AMPLITUDE = 0.02
 
 interface Props {
   deckId: DeckId
 }
 
-/** Front-and-center per-deck waveform: real peaks on a canvas, or a plain progress bar fallback. */
+/** Front-and-center per-deck waveform: real 3-band peaks on a canvas, or a plain progress bar fallback. */
 export default function Waveform({ deckId }: Props) {
   const deck = useDjStore((s) => s.decks[deckId])
   const seek = useDjStore((s) => s.seek)
 
   const containerRef = useRef<HTMLDivElement | null>(null)
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
-  const sizeRef = useRef({ width: 0, height: WAVEFORM_HEIGHT })
+  const sizeRef = useRef({ width: 0, height: DEFAULT_CANVAS_HEIGHT })
   const draggingRef = useRef(false)
 
   const track = deck.track
@@ -35,7 +51,7 @@ export default function Waveform({ deckId }: Props) {
     const ctx2d = canvas.getContext('2d')
     if (!ctx2d) return
     const { width, height } = sizeRef.current
-    if (width <= 0) return
+    if (width <= 0 || height <= 0) return
 
     const dpr = window.devicePixelRatio || 1
     const targetW = Math.round(width * dpr)
@@ -45,7 +61,17 @@ export default function Waveform({ deckId }: Props) {
       canvas.height = targetH
     }
     ctx2d.setTransform(dpr, 0, 0, dpr, 0, 0)
+
+    const computed = getComputedStyle(canvas)
+    const trackColor = computed.getPropertyValue('--color-wave-track').trim() || FALLBACK_TRACK_COLOR
+    const lowColor = computed.getPropertyValue('--color-wave-low').trim() || FALLBACK_LOW_COLOR
+    const midColor = computed.getPropertyValue('--color-wave-mid').trim() || FALLBACK_MID_COLOR
+    const highColor = computed.getPropertyValue('--color-wave-high').trim() || FALLBACK_HIGH_COLOR
+    const playheadColor = computed.getPropertyValue('--color-wave-playhead').trim() || FALLBACK_PLAYHEAD_COLOR
+
     ctx2d.clearRect(0, 0, width, height)
+    ctx2d.fillStyle = trackColor
+    ctx2d.fillRect(0, 0, width, height)
 
     const currentPeaks = peaks
     if (!currentPeaks || currentPeaks.length === 0) return
@@ -54,40 +80,59 @@ export default function Waveform({ deckId }: Props) {
     const liveDuration = live.durationSec
     const playedFraction = liveDuration > 0 ? Math.min(1, Math.max(0, live.currentTime / liveDuration)) : 0
 
-    const computed = getComputedStyle(canvas)
-    const upcomingColor = computed.getPropertyValue('--color-waveform').trim() || FALLBACK_WAVEFORM_COLOR
-    const playedColor = computed.getPropertyValue('--color-waveform-played').trim() || FALLBACK_PLAYED_COLOR
-
     const barCount = currentPeaks.length
-    const barWidth = width / barCount
+    const slotWidth = width / barCount
     const playedBars = Math.floor(playedFraction * barCount)
     const centerY = height / 2
+    const maxBarHeight = height * 0.92
 
     for (let i = 0; i < barCount; i++) {
-      const amplitude = Math.max(0.03, Math.min(1, currentPeaks[i]))
-      const barHeight = amplitude * height
-      const x = i * barWidth
-      ctx2d.fillStyle = i < playedBars ? playedColor : upcomingColor
-      ctx2d.fillRect(x, centerY - barHeight / 2, Math.max(1, barWidth - 0.5), barHeight)
+      const band = currentPeaks[i]
+      const played = i < playedBars
+      const x = i * slotWidth
+
+      // Low: widest bar, drawn first (behind everything else).
+      const lowW = Math.max(1, slotWidth - 0.5)
+      const lowH = Math.max(MIN_AMPLITUDE, Math.min(1, band.low)) * maxBarHeight
+      ctx2d.globalAlpha = played ? PLAYED_ALPHA : LOW_ALPHA
+      ctx2d.fillStyle = lowColor
+      ctx2d.fillRect(x, centerY - lowH / 2, lowW, lowH)
+
+      // Mid: narrower, centered on top of low.
+      const midW = Math.max(1, lowW * 0.62)
+      const midH = Math.max(MIN_AMPLITUDE, Math.min(1, band.mid)) * maxBarHeight
+      ctx2d.globalAlpha = played ? PLAYED_ALPHA : MID_ALPHA
+      ctx2d.fillStyle = midColor
+      ctx2d.fillRect(x + (lowW - midW) / 2, centerY - midH / 2, midW, midH)
+
+      // High: thinnest, brightest, frontmost spike.
+      const highW = Math.max(1, lowW * 0.3)
+      const highH = Math.max(MIN_AMPLITUDE, Math.min(1, band.high)) * maxBarHeight
+      ctx2d.globalAlpha = played ? PLAYED_ALPHA : HIGH_ALPHA
+      ctx2d.fillStyle = highColor
+      ctx2d.fillRect(x + (lowW - highW) / 2, centerY - highH / 2, highW, highH)
     }
 
+    ctx2d.globalAlpha = 1
     const playheadX = Math.min(width - 1.5, playedFraction * width)
-    ctx2d.fillStyle = '#ffffff'
+    ctx2d.fillStyle = playheadColor
     ctx2d.fillRect(playheadX, 0, 1.5, height)
   }, [peaks, deckId])
 
-  // Keep the canvas sized to its container.
+  // Keep the canvas sized to its container. Height (not just width) is read from
+  // the container's actual box so the compact/phone-landscape CSS breakpoint can
+  // shrink the waveform just by changing its CSS height — no JS constant to update.
   useEffect(() => {
     const el = containerRef.current
     if (!el) return
     const observer = new ResizeObserver((entries) => {
       const entry = entries[0]
       if (!entry) return
-      sizeRef.current = { width: entry.contentRect.width, height: WAVEFORM_HEIGHT }
+      sizeRef.current = { width: entry.contentRect.width, height: entry.contentRect.height || DEFAULT_CANVAS_HEIGHT }
       draw()
     })
     observer.observe(el)
-    sizeRef.current = { width: el.clientWidth, height: WAVEFORM_HEIGHT }
+    sizeRef.current = { width: el.clientWidth, height: el.clientHeight || DEFAULT_CANVAS_HEIGHT }
     draw()
     return () => observer.disconnect()
   }, [draw])
@@ -156,9 +201,9 @@ export default function Waveform({ deckId }: Props) {
 
   let caption: string | null = null
   if (track && !deck.supportsAnalysis) {
-    caption = 'Golfvorm niet beschikbaar voor streaming-bronnen'
+    caption = 'Waveform unavailable for streaming sources'
   } else if (track && deck.supportsAnalysis) {
-    caption = 'Analyseren...'
+    caption = 'Analyzing...'
   }
 
   return (

@@ -16,7 +16,7 @@ export default function Mixer() {
     <div className={styles.mixer}>
       <div className={styles.header}>
         <span className={styles.headerTitle}>MIXER</span>
-        <div className={styles.deckCountToggle} role="group" aria-label="Aantal decks">
+        <div className={styles.deckCountToggle} role="group" aria-label="Deck count">
           <button
             type="button"
             className={deckCount === 2 ? `${styles.deckCountBtn} ${styles.deckCountBtnActive}` : styles.deckCountBtn}

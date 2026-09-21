@@ -9,10 +9,10 @@ import { fetchSpotifyTrackMetadata } from '../../sources/spotify'
 import styles from './Library.module.css'
 
 const SOURCE_LABELS: Record<SourceKind, string> = {
-  file: 'bestand',
-  dropbox: 'dropbox',
-  soundcloud: 'soundcloud',
-  spotify: 'spotify',
+  file: 'File',
+  dropbox: 'Dropbox',
+  soundcloud: 'SoundCloud',
+  spotify: 'Spotify',
 }
 
 function trackFromFile(file: File): Track {
@@ -46,6 +46,10 @@ export default function Library() {
   const loadTrackToDeck = useDjStore((s) => s.loadTrackToDeck)
 
   const deckIds: DeckId[] = Array.from({ length: deckCount }, (_, i) => i as DeckId)
+
+  // Compact/phone-landscape only: whether the track list overlay is open.
+  // Irrelevant (and hidden via CSS) outside the max-height: 480px breakpoint.
+  const [isTrackListOpen, setIsTrackListOpen] = useState(false)
 
   // --- local files ---
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -165,8 +169,8 @@ export default function Library() {
   return (
     <div className={styles.panel}>
       <p className={styles.legalNote}>
-        SoundCloud en Spotify staan om technische/juridische redenen geen volledige mixing toe (geen EQ, geen golfvorm, geen
-        pitch) — voor volledig mixen (EQ, sync, loops) gebruik je bestanden of Dropbox.
+        SoundCloud and Spotify don't allow full mixing (no EQ, no waveform, no pitch) for technical/legal reasons — for
+        full mixing (EQ, sync, loops) use files or Dropbox.
       </p>
 
       <div className={styles.importRow}>
@@ -176,7 +180,7 @@ export default function Library() {
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
         >
-          <span className={styles.groupLabel}>Bestanden</span>
+          <span className={styles.groupLabel}>Files</span>
           <input
             ref={fileInputRef}
             type="file"
@@ -186,19 +190,19 @@ export default function Library() {
             onChange={handleFileInputChange}
           />
           <button type="button" className={styles.smallButton} onClick={() => fileInputRef.current?.click()}>
-            Bestanden toevoegen
+            Add files
           </button>
-          <span className={styles.dropHint}>of sleep audiobestanden hierheen</span>
+          <span className={styles.dropHint}>or drag audio files here</span>
         </div>
 
         <div className={styles.importGroup}>
           <span className={styles.groupLabel}>Dropbox</span>
           <button type="button" className={styles.smallButton} onClick={handleDropboxClick} disabled={isDropboxLoading}>
-            {isDropboxLoading ? 'Bezig...' : 'Dropbox'}
+            {isDropboxLoading ? 'Loading...' : 'Dropbox'}
           </button>
           {dropboxError && (
             <span className={styles.errorNote}>
-              {dropboxError} Open eventueel de instellingen om een Dropbox app-key in te vullen.
+              {dropboxError} Open settings to add a Dropbox app key if needed.
             </span>
           )}
         </div>
@@ -209,12 +213,12 @@ export default function Library() {
             <input
               type="text"
               className={styles.textInput}
-              placeholder="SoundCloud track-URL"
+              placeholder="SoundCloud track URL"
               value={scUrl}
               onChange={(e) => setScUrl(e.target.value)}
             />
             <button type="submit" className={styles.smallButton} disabled={isScLoading || !scUrl.trim()}>
-              {isScLoading ? 'Bezig...' : 'Toevoegen'}
+              {isScLoading ? 'Adding...' : 'Add'}
             </button>
           </form>
           {scError && <span className={styles.errorNote}>{scError}</span>}
@@ -228,12 +232,12 @@ export default function Library() {
                 <input
                   type="text"
                   className={styles.textInput}
-                  placeholder="Spotify track-URL of URI"
+                  placeholder="Spotify track URL or URI"
                   value={spotifyUrl}
                   onChange={(e) => setSpotifyUrl(e.target.value)}
                 />
                 <button type="submit" className={styles.smallButton} disabled={isSpotifyLoading || !spotifyUrl.trim()}>
-                  {isSpotifyLoading ? 'Bezig...' : 'Toevoegen'}
+                  {isSpotifyLoading ? 'Adding...' : 'Add'}
                 </button>
               </form>
               {spotifyError && <span className={styles.errorNote}>{spotifyError}</span>}
@@ -246,20 +250,46 @@ export default function Library() {
                 onClick={handleSpotifyConnect}
                 disabled={isSpotifyConnecting}
               >
-                {isSpotifyConnecting ? 'Bezig...' : 'Verbind met Spotify'}
+                {isSpotifyConnecting ? 'Connecting...' : 'Connect to Spotify'}
               </button>
               {spotifyConnectError && (
                 <span className={styles.errorNote}>
-                  {spotifyConnectError} Open eventueel eerst de instellingen om een Spotify Client ID in te vullen.
+                  {spotifyConnectError} Open settings first to add a Spotify Client ID if needed.
                 </span>
               )}
             </>
           )}
         </div>
+
+        <button
+          type="button"
+          className={styles.tracksToggle}
+          onClick={() => setIsTrackListOpen((open) => !open)}
+          aria-expanded={isTrackListOpen}
+        >
+          Tracks{library.length > 0 ? ` (${library.length})` : ''}
+        </button>
       </div>
 
-      <div className={styles.trackList}>
-        {library.length === 0 && <p className={styles.emptyState}>Nog geen tracks in de bibliotheek.</p>}
+      <div
+        className={`${styles.backdrop} ${isTrackListOpen ? styles.backdropVisible : ''}`}
+        onClick={() => setIsTrackListOpen(false)}
+        aria-hidden="true"
+      />
+
+      <div className={`${styles.trackList} ${isTrackListOpen ? styles.trackListOpen : ''}`}>
+        <div className={styles.trackListHeader}>
+          <span className={styles.trackListTitle}>Tracks</span>
+          <button
+            type="button"
+            className={styles.closeTracksButton}
+            onClick={() => setIsTrackListOpen(false)}
+            aria-label="Close track list"
+          >
+            ×
+          </button>
+        </div>
+        {library.length === 0 && <p className={styles.emptyState}>No tracks in the library yet.</p>}
         {library.map((track) => (
           <div className={styles.row} key={track.id}>
             <div className={styles.artwork}>
@@ -283,7 +313,7 @@ export default function Library() {
                   type="button"
                   className={`${styles.deckButton} ${deckId % 2 === 0 ? styles.deckButtonA : styles.deckButtonB}`}
                   onClick={() => loadTrackToDeck(deckId, track)}
-                  title={`Laad op deck ${deckId + 1}`}
+                  title={`Load on deck ${deckId + 1}`}
                 >
                   {deckId + 1}
                 </button>
@@ -293,8 +323,8 @@ export default function Library() {
               type="button"
               className={styles.removeButton}
               onClick={() => removeTrack(track.id)}
-              aria-label="Verwijder track"
-              title="Verwijder track"
+              aria-label="Remove track"
+              title="Remove track"
             >
               ×
             </button>

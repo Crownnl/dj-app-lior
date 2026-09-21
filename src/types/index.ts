@@ -18,9 +18,15 @@ export interface Track {
   spotifyUri?: string
   durationMs?: number
   bpm?: number
-  /** Normalized (0..1) waveform peaks, only available for decodable sources (file/dropbox). */
-  peaks?: number[]
+  /** Per-bucket normalized (0..1) low/mid/high band energy, for the Rekordbox-style colored waveform. Only available for decodable sources (file/dropbox). */
+  peaks?: WaveformBand[]
   addedAt: number
+}
+
+export interface WaveformBand {
+  low: number
+  mid: number
+  high: number
 }
 
 export type CrossfaderAssign = 'A' | 'B' | 'THRU'
@@ -95,6 +101,6 @@ export interface DeckController {
 
 export interface TrackAnalysis {
   bpm?: number
-  peaks?: number[]
+  peaks?: WaveformBand[]
   durationSec: number
 }

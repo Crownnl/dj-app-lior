@@ -109,7 +109,7 @@ export function isSpotifyAuthorized(): boolean {
 export async function startSpotifyLogin(): Promise<void> {
   const clientId = getSpotifyClientId()
   if (!clientId) {
-    throw new Error('Er is nog geen Spotify Client ID ingesteld. Voeg deze eerst toe bij de instellingen.')
+    throw new Error('No Spotify Client ID has been set yet. Add one in settings first.')
   }
 
   const verifier = generateCodeVerifier()
@@ -148,11 +148,11 @@ export async function handleSpotifyRedirectCallback(): Promise<void> {
   try {
     const verifier = sessionStorage.getItem(PKCE_VERIFIER_STORAGE_KEY)
     if (!verifier) {
-      throw new Error('Geen opgeslagen PKCE code_verifier gevonden voor deze Spotify-login.')
+      throw new Error('No stored PKCE code_verifier found for this Spotify login.')
     }
     const clientId = getSpotifyClientId()
     if (!clientId) {
-      throw new Error('Geen Spotify Client ID geconfigureerd.')
+      throw new Error('No Spotify Client ID configured.')
     }
 
     const body = new URLSearchParams({
@@ -169,7 +169,7 @@ export async function handleSpotifyRedirectCallback(): Promise<void> {
       body: body.toString(),
     })
     if (!response.ok) {
-      throw new Error(`Spotify token-uitwisseling mislukt (status ${response.status})`)
+      throw new Error(`Spotify token exchange failed (status ${response.status})`)
     }
     const json = (await response.json()) as SpotifyTokenResponse
     writeStoredToken({
@@ -178,7 +178,7 @@ export async function handleSpotifyRedirectCallback(): Promise<void> {
       expiresAt: Date.now() + json.expires_in * 1000,
     })
   } catch (err) {
-    console.error('Spotify: inloggen via redirect mislukt', err)
+    console.error('Spotify: redirect login failed', err)
   } finally {
     try {
       sessionStorage.removeItem(PKCE_VERIFIER_STORAGE_KEY)
@@ -194,7 +194,7 @@ export async function handleSpotifyRedirectCallback(): Promise<void> {
 async function refreshAccessToken(refreshToken: string): Promise<StoredSpotifyToken> {
   const clientId = getSpotifyClientId()
   if (!clientId) {
-    throw new Error('Geen Spotify Client ID geconfigureerd.')
+    throw new Error('No Spotify Client ID configured.')
   }
   const body = new URLSearchParams({
     grant_type: 'refresh_token',
@@ -207,7 +207,7 @@ async function refreshAccessToken(refreshToken: string): Promise<StoredSpotifyTo
     body: body.toString(),
   })
   if (!response.ok) {
-    throw new Error(`Spotify token vernieuwen mislukt (status ${response.status})`)
+    throw new Error(`Spotify token refresh failed (status ${response.status})`)
   }
   const json = (await response.json()) as SpotifyTokenResponse
   const refreshed: StoredSpotifyToken = {
@@ -238,7 +238,7 @@ export async function getValidSpotifyAccessToken(): Promise<string | null> {
     const refreshed = await refreshAccessToken(token.refreshToken)
     return refreshed.accessToken
   } catch (err) {
-    console.error('Spotify: token vernieuwen mislukt', err)
+    console.error('Spotify: token refresh failed', err)
     return null
   }
 }

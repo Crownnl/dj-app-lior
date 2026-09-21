@@ -65,9 +65,9 @@ function loadWidgetApi(): Promise<SCNamespace> {
     const existing = document.querySelector<HTMLScriptElement>(`script[src="${WIDGET_SCRIPT_URL}"]`)
     const onLoad = () => {
       if (window.SC) resolve(window.SC)
-      else reject(new Error('SoundCloud widget script geladen maar SC niet beschikbaar'))
+      else reject(new Error('SoundCloud widget script loaded but SC is not available'))
     }
-    const onError = () => reject(new Error('Kon SoundCloud widget script niet laden'))
+    const onError = () => reject(new Error('Could not load SoundCloud widget script'))
 
     if (existing) {
       existing.addEventListener('load', onLoad, { once: true })
@@ -90,28 +90,28 @@ function loadWidgetApi(): Promise<SCNamespace> {
 export async function resolveSoundCloudUrl(url: string): Promise<Track> {
   const trimmed = url.trim()
   if (!/^https?:\/\/(www\.)?(m\.)?soundcloud\.com\//i.test(trimmed)) {
-    throw new Error('Dit lijkt geen geldige SoundCloud-link. Plak een link zoals https://soundcloud.com/artiest/nummer')
+    throw new Error("This doesn't look like a valid SoundCloud link. Paste a link like https://soundcloud.com/artist/track")
   }
 
   let response: Response
   try {
     response = await fetch(`https://soundcloud.com/oembed?format=json&url=${encodeURIComponent(trimmed)}`)
   } catch {
-    throw new Error('Kon geen verbinding maken met SoundCloud. Controleer je internetverbinding en probeer opnieuw.')
+    throw new Error('Could not connect to SoundCloud. Check your internet connection and try again.')
   }
 
   if (!response.ok) {
-    throw new Error('SoundCloud kon deze track niet vinden. Controleer of de link klopt en publiek is.')
+    throw new Error('SoundCloud could not find this track. Check that the link is correct and public.')
   }
 
   let data: { title?: string; author_name?: string; thumbnail_url?: string }
   try {
     data = await response.json()
   } catch {
-    throw new Error('SoundCloud gaf een onverwacht antwoord terug. Probeer het later opnieuw.')
+    throw new Error('SoundCloud returned an unexpected response. Please try again later.')
   }
 
-  const rawTitle = data.title?.trim() || 'Onbekende track'
+  const rawTitle = data.title?.trim() || 'Unknown track'
   const separatorIndex = rawTitle.indexOf(' - ')
   let title = rawTitle
   let artist = data.author_name?.trim()
@@ -184,7 +184,7 @@ export function createSoundCloudController(deckId: DeckId, _ctx: AudioEngineCont
     supportsAnalysis: false,
 
     async load(track: Track) {
-      if (!track.soundcloudUrl) throw new Error('Track heeft geen SoundCloud-URL')
+      if (!track.soundcloudUrl) throw new Error('Track has no SoundCloud URL')
 
       teardownWidget()
       cachedCurrentTime = 0
@@ -207,7 +207,7 @@ export function createSoundCloudController(deckId: DeckId, _ctx: AudioEngineCont
         newWidget.bind(SC.Widget.Events.ERROR, () => {
           if (settled) return
           settled = true
-          reject(new Error('SoundCloud kon deze track niet afspelen'))
+          reject(new Error('SoundCloud could not play this track'))
         })
 
         newWidget.bind(SC.Widget.Events.READY, () => {

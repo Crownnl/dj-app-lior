@@ -3,7 +3,12 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  padding: 10px 12px;
+  /* Safe-area insets matter most here in landscape (this app's primary
+     orientation): a phone's notch/pill or home-indicator sits on the left
+     or right side, not the top/bottom. env() falls back to 0 on anything
+     that isn't a notched device (incl. plain desktop browsers). */
+  padding: calc(10px + env(safe-area-inset-top, 0px)) calc(12px + env(safe-area-inset-right, 0px))
+    calc(10px + env(safe-area-inset-bottom, 0px)) calc(12px + env(safe-area-inset-left, 0px));
   min-height: 0;
 }
 
@@ -31,4 +36,56 @@
   overflow: hidden;
   display: flex;
   flex-direction: column;
+}
+
+/* Narrow width (phone portrait / small tablet): stack decks in one column
+   instead of forcing 2-4 cramped side-by-side panels. Only kicks in when
+   the viewport is also tall enough that it isn't the landscape-compact
+   case below (that one wins on short screens regardless of width). */
+@media (max-width: 700px) and (min-height: 481px) {
+  .app {
+    height: auto;
+    min-height: 100%;
+    padding: calc(8px + env(safe-area-inset-top, 0px)) calc(8px + env(safe-area-inset-right, 0px))
+      calc(8px + env(safe-area-inset-bottom, 0px)) calc(8px + env(safe-area-inset-left, 0px));
+    gap: 6px;
+  }
+
+  .decks,
+  .decksFour {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+
+  .mixerArea {
+    height: 360px;
+  }
+
+  .libraryArea {
+    min-height: 220px;
+  }
+}
+
+/* Phone-landscape / any short viewport: this is the primary target for
+   on-the-go use (a phone held sideways, like a real controller). Squeeze
+   every panel's fixed budget down to what its own compact styles need. */
+@media (max-height: 480px) {
+  .app {
+    padding: calc(4px + env(safe-area-inset-top, 0px)) calc(8px + env(safe-area-inset-right, 0px))
+      calc(4px + env(safe-area-inset-bottom, 0px)) calc(8px + env(safe-area-inset-left, 0px));
+    gap: 6px;
+  }
+
+  .decks {
+    height: 168px;
+    gap: 6px;
+  }
+
+  .mixerArea {
+    height: 176px;
+  }
+
+  .libraryArea {
+    min-height: 40px;
+  }
 }

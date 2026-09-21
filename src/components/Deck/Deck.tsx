@@ -9,7 +9,7 @@ interface Props {
 }
 
 const SOURCE_LABELS: Record<SourceKind, string> = {
-  file: 'bestand',
+  file: 'file',
   dropbox: 'dropbox',
   soundcloud: 'soundcloud',
   spotify: 'spotify',
@@ -55,7 +55,7 @@ export default function Deck({ deckId }: Props) {
               {track.artist && <span className={styles.artist}>{track.artist}</span>}
             </>
           ) : (
-            <span className={styles.placeholder}>Geen track geladen</span>
+            <span className={styles.placeholder}>No track loaded</span>
           )}
         </div>
         <div className={styles.headerRight}>
@@ -64,7 +64,7 @@ export default function Deck({ deckId }: Props) {
         </div>
       </div>
 
-      {!deck.supportsEQ && track && <div className={styles.streamNote}>beperkte mixing (streaming)</div>}
+      {!deck.supportsEQ && track && <div className={styles.streamNote}>Limited mixing (streaming)</div>}
 
       <Waveform deckId={deckId} />
 
@@ -82,6 +82,7 @@ export default function Deck({ deckId }: Props) {
           className={`${styles.transportButton} ${styles.playButton}`}
           onClick={() => togglePlay(deckId)}
           disabled={!track}
+          aria-label={deck.isPlaying ? 'Pause' : 'Play'}
         >
           {deck.isPlaying ? (
             <svg width="14" height="14" viewBox="0 0 14 14" aria-hidden="true">
@@ -117,7 +118,7 @@ export default function Deck({ deckId }: Props) {
         <PitchFader deckId={deckId} />
       </div>
 
-      {deck.isLoading && <div className={styles.loadingOverlay}>Laden...</div>}
+      {deck.isLoading && <div className={styles.loadingOverlay}>Loading...</div>}
       {deck.error && <div className={styles.error}>{deck.error}</div>}
     </div>
   )

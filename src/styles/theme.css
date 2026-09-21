@@ -16,8 +16,14 @@
   --color-accent-warn: #ffb648;
   --color-accent-ok: #4ade80;
 
-  --color-waveform: #ff5a5f;
-  --color-waveform-played: #5a5e6b;
+  /* Rekordbox-style 3-band colored waveform. Draw the played portion at
+     reduced opacity (e.g. canvas globalAlpha ~0.4) rather than a separate
+     "played" color per band — keeps the palette small and consistent. */
+  --color-wave-low: #ff5f4a;
+  --color-wave-mid: #ffd23f;
+  --color-wave-high: #4fd8ff;
+  --color-wave-playhead: #ffffff;
+  --color-wave-track: #1a1d26;
 
   --radius-sm: 4px;
   --radius-md: 8px;
@@ -28,6 +34,17 @@
 
   color-scheme: dark;
 }
+
+/*
+  Shared responsive breakpoint convention — use these exact queries
+  everywhere so every panel collapses together instead of at staggered
+  points. Target use case: a phone held sideways (landscape), which is
+  short and wide, same as a real DJ controller.
+    - Compact / phone-landscape (short viewport): @media (max-height: 480px)
+    - Narrow width (phone portrait / small tablet): @media (max-width: 700px)
+  Compact mode should shrink paddings/gaps/knob+fader sizes and drop
+  anything decorative, never clip or overlap controls.
+*/
 
 * {
   box-sizing: border-box;

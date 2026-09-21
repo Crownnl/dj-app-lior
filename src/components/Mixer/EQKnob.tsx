@@ -6,7 +6,7 @@ import styles from './Mixer.module.css'
 const BAND_LABELS: Record<EQBand, string> = { high: 'HI', mid: 'MID', low: 'LOW' }
 const MIN = 0
 const MAX = 2
-const DISABLED_TITLE = 'EQ niet beschikbaar voor streaming-bronnen (Spotify/SoundCloud staan geen ruwe audiotoegang toe)'
+const DISABLED_TITLE = "EQ unavailable for streaming sources (Spotify/SoundCloud don't allow raw audio access)"
 
 export default function EQKnob({ deckId, band }: { deckId: DeckId; band: EQBand }) {
   const value = useDjStore((s) => s.decks[deckId].eq[band])

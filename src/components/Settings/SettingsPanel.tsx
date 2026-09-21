@@ -42,8 +42,8 @@ export default function SettingsPanel() {
         type="button"
         className={styles.gearButton}
         onClick={() => setIsOpen(true)}
-        aria-label="Instellingen openen"
-        title="Instellingen"
+        aria-label="Open settings"
+        title="Settings"
       >
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <circle cx="12" cy="12" r="3.2" stroke="currentColor" strokeWidth="1.6" />
@@ -58,14 +58,14 @@ export default function SettingsPanel() {
 
       {isOpen && (
         <div className={styles.overlay} onMouseDown={handleOverlayMouseDown}>
-          <div className={styles.panel} role="dialog" aria-modal="true" aria-label="Instellingen">
+          <div className={styles.panel} role="dialog" aria-modal="true" aria-label="Settings">
             <div className={styles.header}>
-              <h2 className={styles.title}>Instellingen</h2>
+              <h2 className={styles.title}>Settings</h2>
               <button
                 type="button"
                 className={styles.closeButton}
                 onClick={() => setIsOpen(false)}
-                aria-label="Sluiten"
+                aria-label="Close"
               >
                 ×
               </button>
@@ -81,13 +81,13 @@ export default function SettingsPanel() {
                 className={styles.input}
                 value={dropboxAppKey}
                 onChange={handleDropboxChange}
-                placeholder="bijv. 8f2k9x1qz..."
+                placeholder="e.g. 8f2k9x1qz..."
                 autoComplete="off"
                 spellCheck={false}
               />
               <p className={styles.help}>
-                Maak gratis een app-key aan via https://www.dropbox.com/developers/apps. Voeg daar het domein van deze app
-                toe bij "Allowed origins" (toegestane herkomst), anders werkt de bestandskiezer niet.
+                Create a free app key at https://www.dropbox.com/developers/apps. Add this app's domain there under
+                "Allowed origins", otherwise the file picker won't work.
               </p>
             </div>
 
@@ -101,18 +101,18 @@ export default function SettingsPanel() {
                 className={styles.input}
                 value={spotifyClientId}
                 onChange={handleSpotifyChange}
-                placeholder="bijv. 3f9a7c2e..."
+                placeholder="e.g. 3f9a7c2e..."
                 autoComplete="off"
                 spellCheck={false}
               />
               <p className={styles.help}>
-                Maak gratis een app aan via https://developer.spotify.com/dashboard. Voeg daar exact onderstaande URL toe
-                als "Redirect URI":
+                Create a free app at https://developer.spotify.com/dashboard. Add the exact URL below there as the
+                "Redirect URI":
               </p>
               <p className={styles.redirectUrl}>{currentPageUrl}</p>
               <p className={styles.help}>
-                Let op: afspelen via Spotify vereist een Spotify Premium-account — dit is een vereiste van Spotify zelf,
-                geen beperking van deze app.
+                Note: playback via Spotify requires a Spotify Premium account — this is a requirement from Spotify
+                itself, not a limitation of this app.
               </p>
             </div>
           </div>

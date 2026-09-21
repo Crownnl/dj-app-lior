@@ -59,12 +59,12 @@ export function ensureSpotifySdkLoaded(): Promise<typeof Spotify> {
   sdkLoadPromise = new Promise<typeof Spotify>((resolve, reject) => {
     window.onSpotifyWebPlaybackSDKReady = () => {
       if (window.Spotify) resolve(window.Spotify)
-      else reject(new Error('Spotify Web Playback SDK is geladen maar niet beschikbaar op window.'))
+      else reject(new Error('Spotify Web Playback SDK loaded but is not available on window.'))
     }
     const script = document.createElement('script')
     script.src = SPOTIFY_SDK_URL
     script.async = true
-    script.onerror = () => reject(new Error('Kon de Spotify Web Playback SDK niet laden.'))
+    script.onerror = () => reject(new Error('Could not load the Spotify Web Playback SDK.'))
     document.head.appendChild(script)
   })
 
@@ -105,19 +105,19 @@ function extractSpotifyTrackId(urlOrUri: string): string | null {
 export async function fetchSpotifyTrackMetadata(urlOrUri: string): Promise<Track> {
   const id = extractSpotifyTrackId(urlOrUri)
   if (!id) {
-    throw new Error('Kon geen geldige Spotify-track vinden in deze link.')
+    throw new Error('Could not find a valid Spotify track in this link.')
   }
 
   const token = await getValidSpotifyAccessToken()
   if (!token) {
-    throw new Error('Verbind eerst met Spotify voordat je een track toevoegt.')
+    throw new Error('Connect to Spotify first before adding a track.')
   }
 
   const response = await fetch(`https://api.spotify.com/v1/tracks/${id}`, {
     headers: { Authorization: `Bearer ${token}` },
   })
   if (!response.ok) {
-    throw new Error(`Kon Spotify-track niet ophalen (status ${response.status})`)
+    throw new Error(`Could not fetch Spotify track (status ${response.status})`)
   }
   const json = (await response.json()) as SpotifyTrackApiResponse
 
@@ -217,7 +217,7 @@ export function createSpotifyController(deckId: DeckId, _ctx: AudioEngineContext
   async function startPlaybackOnDevice(forDeviceId: string, spotifyUri: string): Promise<void> {
     const token = await getValidSpotifyAccessToken()
     if (!token) {
-      throw new Error('Niet verbonden met Spotify.')
+      throw new Error('Not connected to Spotify.')
     }
     const response = await fetch(
       `https://api.spotify.com/v1/me/player/play?device_id=${encodeURIComponent(forDeviceId)}`,
@@ -231,7 +231,7 @@ export function createSpotifyController(deckId: DeckId, _ctx: AudioEngineContext
       },
     )
     if (!response.ok && response.status !== 204) {
-      throw new Error(`Kon Spotify-afspelen niet starten (status ${response.status})`)
+      throw new Error(`Could not start Spotify playback (status ${response.status})`)
     }
   }
 
@@ -242,10 +242,10 @@ export function createSpotifyController(deckId: DeckId, _ctx: AudioEngineContext
 
     async load(track: Track) {
       if (!track.spotifyUri) {
-        throw new Error('Deze track heeft geen Spotify-URI.')
+        throw new Error('This track has no Spotify URI.')
       }
       if (!isSpotifyAuthorized()) {
-        throw new Error('Verbind eerst met Spotify voordat je een track laadt.')
+        throw new Error('Connect to Spotify first before loading a track.')
       }
 
       const SpotifyNs = await ensureSpotifySdkLoaded()
@@ -268,7 +268,7 @@ export function createSpotifyController(deckId: DeckId, _ctx: AudioEngineContext
 
         const connected = await newPlayer.connect()
         if (!connected) {
-          throw new Error('Kon niet verbinden met de Spotify-speler.')
+          throw new Error('Could not connect to the Spotify player.')
         }
 
         player = newPlayer
@@ -276,7 +276,7 @@ export function createSpotifyController(deckId: DeckId, _ctx: AudioEngineContext
       }
 
       if (!deviceId) {
-        throw new Error('Spotify-speler heeft nog geen apparaat-ID.')
+        throw new Error('Spotify player does not have a device ID yet.')
       }
 
       durationKnown = false
