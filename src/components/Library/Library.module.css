@@ -38,7 +38,10 @@
   transition: background-color 0.1s ease, border-color 0.1s ease;
 }
 
-.importGroup:last-child {
+/* :last-of-type (not :last-child) because the "Tracks" toggle button now
+   follows the import groups in the DOM — it's a <button>, so it doesn't
+   affect which <div>.importGroup is last. */
+.importGroup:last-of-type {
   border-right: none;
 }
 

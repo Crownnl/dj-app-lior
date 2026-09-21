@@ -134,3 +134,44 @@
   border-radius: var(--radius-sm);
   word-break: break-all;
 }
+
+/* ---- Narrow width (portrait phone / small tablet) ---- */
+@media (max-width: 700px) and (min-height: 481px) {
+  .panel {
+    width: calc(100vw - 24px);
+    padding: 12px;
+    gap: 12px;
+  }
+}
+
+/* ---- Compact / phone-landscape (short viewport): the dialog is
+   centered over a very short screen, so trim its own padding/gaps and
+   let it use nearly the full viewport height rather than assuming
+   desktop headroom. ---- */
+@media (max-height: 480px) {
+  .gearButton {
+    top: 6px;
+    right: 6px;
+    width: 26px;
+    height: 26px;
+  }
+
+  .panel {
+    width: calc(100vw - 16px);
+    max-height: calc(100vh - 16px);
+    padding: 10px;
+    gap: 10px;
+  }
+
+  .title {
+    font-size: 13px;
+  }
+
+  .input {
+    height: 26px;
+  }
+
+  .help {
+    font-size: 10px;
+  }
+}
