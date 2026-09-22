@@ -155,6 +155,7 @@ export function createSpotifyController(deckId: DeckId, _ctx: AudioEngineContext
   let wasNearEnd = false
 
   let pollIntervalHandle: ReturnType<typeof setInterval> | null = null
+  let isDestroyed = false
 
   const timeListeners = new Set<(t: number) => void>()
   const endedListeners = new Set<() => void>()
@@ -248,7 +249,14 @@ export function createSpotifyController(deckId: DeckId, _ctx: AudioEngineContext
         throw new Error('Connect to Spotify first before loading a track.')
       }
 
+      // load() has several await points; if destroy() runs while one is
+      // pending (the deck got reloaded with a different track before this
+      // one finished), bail out instead of continuing to set up playback
+      // for a track this controller no longer represents.
+      const cancelledError = () => new Error('Load cancelled: deck was reloaded with a different track')
+
       const SpotifyNs = await ensureSpotifySdkLoaded()
+      if (isDestroyed) throw cancelledError()
 
       if (!player) {
         const newPlayer = new SpotifyNs.Player({
@@ -273,6 +281,7 @@ export function createSpotifyController(deckId: DeckId, _ctx: AudioEngineContext
 
         player = newPlayer
         deviceId = await readyPromise
+        if (isDestroyed) throw cancelledError()
       }
 
       if (!deviceId) {
@@ -287,8 +296,10 @@ export function createSpotifyController(deckId: DeckId, _ctx: AudioEngineContext
       cachedAtClientTime = Date.now()
 
       await startPlaybackOnDevice(deviceId, track.spotifyUri)
+      if (isDestroyed) throw cancelledError()
       // Freshly-loaded decks start paused, consistent with file/dropbox decks.
       await player.pause()
+      if (isDestroyed) throw cancelledError()
       cachedIsPaused = true
       cachedAtClientTime = Date.now()
     },
@@ -338,6 +349,7 @@ export function createSpotifyController(deckId: DeckId, _ctx: AudioEngineContext
       return () => loadedListeners.delete(cb)
     },
     destroy() {
+      isDestroyed = true
       stopPolling()
       timeListeners.clear()
       endedListeners.clear()

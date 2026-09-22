@@ -1,5 +1,13 @@
 import type { CrossfaderAssign, DeckController, DeckId, EQBand, SourceKind, Track } from '../types'
 
+/** Thrown by loadTrackToDeck when a newer load call already took over the same deck; callers should ignore this rather than surface it as a user-facing error. */
+export class SupersededLoadError extends Error {
+  constructor() {
+    super('Superseded by a newer load for this deck')
+    this.name = 'SupersededLoadError'
+  }
+}
+
 /**
  * Persistent Web Audio graph for one deck:
  *   input (gain trim) -> lowShelf -> midPeak -> highShelf -> channelGain -> crossfaderGain -> masterGain
@@ -44,6 +52,8 @@ export class AudioEngine {
   private deckRuntime = new Map<DeckId, DeckRuntimeState>()
   private controllers = new Map<DeckId, DeckController>()
   private controllerFactories = new Map<SourceKind, ControllerFactory>()
+  /** Bumped on every loadTrackToDeck call so a slower, superseded load can tell it lost the race and back out instead of overwriting a newer track's state. */
+  private loadGeneration = new Map<DeckId, number>()
   private crossfaderPos = 0.5
   private masterVolume = 0.85
 
@@ -114,6 +124,14 @@ export class AudioEngine {
     if (!factory) {
       throw new Error(`No player available for source "${track.source}"`)
     }
+
+    // Claim this load attempt. If another loadTrackToDeck(deckId, ...) call
+    // starts before this one's controller.load() resolves, it bumps this
+    // counter again — when this call notices its generation is no longer
+    // current, it backs out instead of clobbering the newer track's state.
+    const myGeneration = (this.loadGeneration.get(deckId) ?? 0) + 1
+    this.loadGeneration.set(deckId, myGeneration)
+
     const context: AudioEngineContext = {
       audioContext: this.ctx,
       connectSource: (id, node) => {
@@ -123,7 +141,23 @@ export class AudioEngine {
     }
     const controller = factory(deckId, context)
     this.controllers.set(deckId, controller)
-    await controller.load(track)
+
+    try {
+      await controller.load(track)
+    } catch (err) {
+      if (this.loadGeneration.get(deckId) === myGeneration) throw err
+      controller.destroy()
+      throw new SupersededLoadError()
+    }
+
+    if (this.loadGeneration.get(deckId) !== myGeneration) {
+      // A newer track was loaded onto this deck while this one was still
+      // loading — this controller lost the race, tear it down rather than
+      // let it (or its caller) touch the deck's now-current state.
+      controller.destroy()
+      throw new SupersededLoadError()
+    }
+
     this.applyDeckGains(deckId)
     return controller
   }

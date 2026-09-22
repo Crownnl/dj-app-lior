@@ -155,6 +155,7 @@ export function createSoundCloudController(deckId: DeckId, _ctx: AudioEngineCont
 
   let cachedCurrentTime = 0
   let cachedDuration = 0
+  let cancelPendingLoad: (() => void) | null = null
 
   const timeListeners = new Set<(t: number) => void>()
   const endedListeners = new Set<() => void>()
@@ -204,9 +205,20 @@ export function createSoundCloudController(deckId: DeckId, _ctx: AudioEngineCont
       await new Promise<void>((resolve, reject) => {
         let settled = false
 
+        // If destroy() runs while this load is still pending (the deck got
+        // reloaded with a different track before this one finished), reject
+        // immediately instead of leaving this promise pending forever.
+        cancelPendingLoad = () => {
+          if (settled) return
+          settled = true
+          cancelPendingLoad = null
+          reject(new Error('Load cancelled: deck was reloaded with a different track'))
+        }
+
         newWidget.bind(SC.Widget.Events.ERROR, () => {
           if (settled) return
           settled = true
+          cancelPendingLoad = null
           reject(new Error('SoundCloud could not play this track'))
         })
 
@@ -228,6 +240,7 @@ export function createSoundCloudController(deckId: DeckId, _ctx: AudioEngineCont
 
           if (!settled) {
             settled = true
+            cancelPendingLoad = null
             resolve()
           }
         })
@@ -277,6 +290,7 @@ export function createSoundCloudController(deckId: DeckId, _ctx: AudioEngineCont
       return () => loadedListeners.delete(cb)
     },
     destroy() {
+      cancelPendingLoad?.()
       teardownWidget()
       timeListeners.clear()
       endedListeners.clear()

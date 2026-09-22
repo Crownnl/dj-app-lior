@@ -15,6 +15,7 @@ export function createMediaFileController(deckId: DeckId, engineCtx: AudioEngine
   audio.preload = 'auto'
 
   let sourceNode: MediaElementAudioSourceNode | null = null
+  let cancelPendingLoad: (() => void) | null = null
 
   const timeListeners = new Set<(t: number) => void>()
   const endedListeners = new Set<() => void>()
@@ -53,6 +54,15 @@ export function createMediaFileController(deckId: DeckId, engineCtx: AudioEngine
         function cleanup() {
           audio.removeEventListener('canplay', onCanPlay)
           audio.removeEventListener('error', onError)
+          cancelPendingLoad = null
+        }
+        // If destroy() runs while this load is still pending (the deck got
+        // reloaded with a different track before this one finished), reject
+        // immediately instead of leaving this promise — and the <audio>
+        // element/listeners it holds onto — pending forever.
+        cancelPendingLoad = () => {
+          cleanup()
+          reject(new Error('Load cancelled: deck was reloaded with a different track'))
         }
         audio.addEventListener('canplay', onCanPlay, { once: true })
         audio.addEventListener('error', onError, { once: true })
@@ -100,6 +110,7 @@ export function createMediaFileController(deckId: DeckId, engineCtx: AudioEngine
       return () => loadedListeners.delete(cb)
     },
     destroy() {
+      cancelPendingLoad?.()
       audio.pause()
       audio.removeEventListener('timeupdate', handleTimeUpdate)
       audio.removeEventListener('ended', handleEnded)

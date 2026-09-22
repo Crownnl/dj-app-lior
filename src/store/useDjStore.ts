@@ -1,9 +1,16 @@
 import { create } from 'zustand'
-import { audioEngine } from '../engine/AudioEngine'
+import { audioEngine, SupersededLoadError } from '../engine/AudioEngine'
 import { analyzeAudio } from '../engine/analysis'
 import type { CrossfaderAssign, DeckId, DeckState, EQBand, MixerState, Track } from '../types'
 
 const ALL_DECK_IDS: DeckId[] = [0, 1, 2, 3]
+// A loop with endSec <= startSec would make the onTimeUpdate loop check
+// reseek to startSec on every tick forever (playback appears frozen) —
+// setLoopIn/setLoopOut both enforce this minimum so that can't happen.
+// Kept comfortably above the browser's ~250ms timeupdate polling interval
+// so the time readout/waveform playhead keep visibly advancing even for an
+// accidental near-instant IN+OUT tap, not just technically non-frozen.
+const MIN_LOOP_LENGTH_SEC = 0.3
 
 function makeInitialDeck(id: DeckId): DeckState {
   return {
@@ -78,6 +85,25 @@ export const useDjStore = create<DjStore>((set, get) => ({
   library: [],
 
   setDeckCount(n) {
+    const previous = get().deckCount
+    if (n < previous) {
+      // Decks that just left the active range must actually stop playing —
+      // they keep running in AudioEngine (their controller doesn't know it
+      // was "hidden") until told to shut down, otherwise a track left
+      // playing on deck 3/4 stays audible with no UI left to control it.
+      const deckIdsToStop = ALL_DECK_IDS.slice(n, previous)
+      for (const id of deckIdsToStop) {
+        audioEngine.destroyDeck(id)
+      }
+      set((state) => ({
+        deckCount: n,
+        decks: {
+          ...state.decks,
+          ...Object.fromEntries(deckIdsToStop.map((id) => [id, makeInitialDeck(id)])),
+        },
+      }))
+      return
+    }
     set({ deckCount: n })
   },
 
@@ -123,7 +149,7 @@ export const useDjStore = create<DjStore>((set, get) => ({
 
       controller.onTimeUpdate((t) => {
         const deck = get().decks[deckId]
-        if (deck.loop && t >= deck.loop.endSec) {
+        if (deck.loop && deck.loop.endSec > deck.loop.startSec && t >= deck.loop.endSec) {
           audioEngine.seek(deckId, deck.loop.startSec)
           return
         }
@@ -162,6 +188,11 @@ export const useDjStore = create<DjStore>((set, get) => ({
         },
       }))
     } catch (err) {
+      if (err instanceof SupersededLoadError) {
+        // A newer loadTrackToDeck call for this same deck already won; that
+        // call owns isLoading/error now, so this stale one must not touch it.
+        return
+      }
       set((state) => ({
         decks: {
           ...state.decks,
@@ -227,7 +258,17 @@ export const useDjStore = create<DjStore>((set, get) => ({
   },
 
   setPitchRange(deckId, range) {
-    set((state) => ({ decks: { ...state.decks, [deckId]: { ...state.decks[deckId], pitchRangePercent: range } } }))
+    // Narrowing the range must also reclamp the actually-applied pitch —
+    // otherwise the fader/readout snap into the new range visually while the
+    // deck keeps audibly playing at the old, now out-of-range rate.
+    const deck = get().decks[deckId]
+    const currentPercent = (deck.pitch - 1) * 100
+    const clampedPercent = Math.min(range, Math.max(-range, currentPercent))
+    const clampedRate = 1 + clampedPercent / 100
+    if (clampedRate !== deck.pitch) audioEngine.setPitch(deckId, clampedRate)
+    set((state) => ({
+      decks: { ...state.decks, [deckId]: { ...state.decks[deckId], pitchRangePercent: range, pitch: clampedRate } },
+    }))
   },
 
   toggleSync(deckId) {
@@ -247,15 +288,28 @@ export const useDjStore = create<DjStore>((set, get) => ({
 
   setLoopIn(deckId) {
     const deck = get().decks[deckId]
+    const startSec = deck.currentTime
+    // A stale endSec from a previous loop can sit at or before the new
+    // startSec (e.g. re-marking IN after scrubbing past the old OUT point) —
+    // enforcing a minimum length here keeps startSec < endSec always true,
+    // which is what stops onTimeUpdate's loop check from reseeking forever.
+    const endSec = Math.max(deck.loop?.endSec ?? startSec + 4, startSec + MIN_LOOP_LENGTH_SEC)
     set((state) => ({
-      decks: { ...state.decks, [deckId]: { ...state.decks[deckId], loop: { startSec: deck.currentTime, endSec: deck.loop?.endSec ?? deck.currentTime + 4 } } },
+      decks: { ...state.decks, [deckId]: { ...state.decks[deckId], loop: { startSec, endSec } } },
     }))
   },
 
   setLoopOut(deckId) {
     const deck = get().decks[deckId]
+    const rawEndSec = deck.currentTime
+    const desiredStart = deck.loop?.startSec ?? Math.max(0, rawEndSec - 4)
+    // Clamp startSec first, then re-derive endSec from it (not the other way
+    // around) so startSec < endSec holds even at the edge case of pressing
+    // OUT at/near currentTime 0 with no prior loop.
+    const startSec = Math.max(0, Math.min(desiredStart, rawEndSec - MIN_LOOP_LENGTH_SEC))
+    const endSec = Math.max(rawEndSec, startSec + MIN_LOOP_LENGTH_SEC)
     set((state) => ({
-      decks: { ...state.decks, [deckId]: { ...state.decks[deckId], loop: { startSec: deck.loop?.startSec ?? Math.max(0, deck.currentTime - 4), endSec: deck.currentTime } } },
+      decks: { ...state.decks, [deckId]: { ...state.decks[deckId], loop: { startSec, endSec } } },
     }))
   },
 
