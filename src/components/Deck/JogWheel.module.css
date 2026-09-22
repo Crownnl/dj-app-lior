@@ -128,10 +128,11 @@
   z-index: 2;
 }
 
-/* Compact / phone-landscape: reuse the same breakpoint as Deck.module.css.
-   Sizing itself comes from the parent (width: 100%; aspect-ratio: 1), so
-   this only trims details that would look heavy at 60-90px. */
-@media (max-height: 480px) {
+/* Compact / phone-landscape, and narrow-width portrait: reuse the same
+   breakpoints as Deck.module.css. Sizing itself comes from the parent
+   (width: 100%; aspect-ratio: 1), so this only trims details that would
+   look heavy at 60-90px. */
+@media (max-height: 480px), (max-width: 700px) and (min-height: 481px) {
   .wheel {
     border-width: 2px;
   }

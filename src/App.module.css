@@ -12,19 +12,48 @@
   min-height: 0;
 }
 
-.decks {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
+/* ---- 2 decks: Deck — Mixer — Deck, side by side as one horizontal unit.
+   This is the actual hardware layout (decks either side of the mixer),
+   replacing the old "decks stacked above a full-width mixer bar" look. ---- */
+.deckMixerRow {
+  display: flex;
   flex: 0 0 auto;
-  height: 460px;
+  height: 480px;
+  gap: 8px;
+  min-height: 0;
 }
 
-.decksFour {
-  grid-template-columns: repeat(4, 1fr);
+.decksSide {
+  display: flex;
+  flex: 1 1 0;
+  gap: 8px;
+  min-width: 0;
+  min-height: 0;
+}
+
+.deckSlot {
+  flex: 1;
+  min-width: 0;
+  height: 100%;
 }
 
 .mixerArea {
+  flex: 0 0 260px;
+  min-height: 0;
+}
+
+/* ---- 4 decks: a deck can't shrink narrow enough to fit two per side of
+   the row above at any viewport this app targets, so quad mode falls back
+   to a 4-across grid with the mixer as a full-width bar underneath. ---- */
+.decksGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  flex: 0 0 auto;
+  height: 480px;
+}
+
+.mixerFull {
   flex: 0 0 auto;
   height: 480px;
   min-height: 0;
@@ -38,8 +67,9 @@
   flex-direction: column;
 }
 
-/* Narrow width (phone portrait / small tablet): stack decks in one column
-   instead of forcing 2-4 cramped side-by-side panels. Only kicks in when
+/* Narrow width (phone portrait / small tablet): a 3-column deck/mixer/deck
+   row would squeeze each panel too thin, so stack them instead — decks
+   still sit either side of the mixer, just vertically. Only kicks in when
    the viewport is also tall enough that it isn't the landscape-compact
    case below (that one wins on short screens regardless of width). */
 @media (max-width: 700px) and (min-height: 481px) {
@@ -51,14 +81,32 @@
     gap: 6px;
   }
 
-  .decks,
-  .decksFour {
+  .deckMixerRow {
+    flex-direction: column;
+    height: auto;
+    gap: 6px;
+  }
+
+  .decksSide {
+    flex: 0 0 auto;
+  }
+
+  .deckSlot {
+    height: 256px;
+  }
+
+  .mixerArea {
+    flex-basis: auto;
+    height: 370px;
+  }
+
+  .decksGrid {
     grid-template-columns: 1fr;
     height: auto;
   }
 
-  .mixerArea {
-    height: 360px;
+  .mixerFull {
+    height: 370px;
   }
 
   .libraryArea {
@@ -68,21 +116,30 @@
 
 /* Phone-landscape / any short viewport: this is the primary target for
    on-the-go use (a phone held sideways, like a real controller). Squeeze
-   every panel's fixed budget down to what its own compact styles need. */
+   every panel's fixed budget down to what its own compact styles need.
+   4-deck mode needs more total height than fits in a short viewport since
+   it stacks decks above the mixer instead of sitting beside it — .app
+   scrolls rather than clipping when that budget is exceeded. */
 @media (max-height: 480px) {
   .app {
     padding: calc(4px + env(safe-area-inset-top, 0px)) calc(8px + env(safe-area-inset-right, 0px))
       calc(4px + env(safe-area-inset-bottom, 0px)) calc(8px + env(safe-area-inset-left, 0px));
     gap: 6px;
+    overflow-y: auto;
   }
 
-  .decks {
+  .deckMixerRow {
     height: 256px;
     gap: 6px;
   }
 
-  .mixerArea {
-    height: 220px;
+  .decksGrid {
+    height: 256px;
+    gap: 6px;
+  }
+
+  .mixerFull {
+    height: 256px;
   }
 
   .libraryArea {

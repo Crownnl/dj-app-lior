@@ -278,11 +278,12 @@
   white-space: nowrap;
 }
 
-/* Compact / phone-landscape: the whole panel gets ~160-170px of height total
-   (see .decks in App.module.css), so every row shrinks to fit without clipping
-   or overlapping the row below it. Non-essential decorative labels (the "LOOP"
-   caption, the streaming-mixing note) are dropped rather than risk a clip. */
-@media (max-height: 480px) {
+/* Compact / phone-landscape, and narrow-width portrait: both give this panel
+   only a limited height budget (see .deckSlot in App.module.css), so every
+   row shrinks to fit without clipping or overlapping the row below it.
+   Non-essential decorative labels (the "LOOP" caption, the streaming-mixing
+   note) are dropped rather than risk a clip. */
+@media (max-height: 480px), (max-width: 700px) and (min-height: 481px) {
   .deck {
     gap: 3px;
     padding: 4px 6px;

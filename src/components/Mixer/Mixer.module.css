@@ -442,8 +442,8 @@ input[type='range'].crossfaderInput::-moz-range-thumb {
   .strip {
     flex: 1 1 60px;
     min-width: 60px;
-    gap: 4px;
-    padding: 6px 3px 5px;
+    gap: 3px;
+    padding: 4px 3px 3px;
   }
 
   .stripLabel {

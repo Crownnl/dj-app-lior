@@ -50,9 +50,11 @@
   text-align: center;
 }
 
-/* Compact / phone-landscape: the deck panel only budgets ~40px for the whole
-   waveform, so shrink it and its caption without ever letting it clip. */
-@media (max-height: 480px) {
+/* Compact / phone-landscape, and narrow-width portrait (same reduced deck
+   budget as the compact case — see App.module.css's .deckSlot): the deck
+   panel only budgets ~40px for the whole waveform, so shrink it and its
+   caption without ever letting it clip. */
+@media (max-height: 480px), (max-width: 700px) and (min-height: 481px) {
   .waveform,
   .fallback {
     height: 40px;

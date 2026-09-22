@@ -102,10 +102,11 @@
   transform: translateY(1px);
 }
 
-/* Compact / phone-landscape: a tall rotated vertical fader doesn't fit the
-   ~20px this row gets, so lay the same <input type="range"> out horizontally
-   instead (no rotation) — same value, same setPitchPercent handler. */
-@media (max-height: 480px) {
+/* Compact / phone-landscape, and narrow-width portrait: a tall rotated
+   vertical fader doesn't fit the ~20px this row gets, so lay the same
+   <input type="range"> out horizontally instead (no rotation) — same
+   value, same setPitchPercent handler. */
+@media (max-height: 480px), (max-width: 700px) and (min-height: 481px) {
   .wrapper {
     flex-direction: row;
     align-items: center;
