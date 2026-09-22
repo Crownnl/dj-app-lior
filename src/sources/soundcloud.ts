@@ -265,6 +265,9 @@ export function createSoundCloudController(deckId: DeckId, _ctx: AudioEngineCont
       // No-op: the SoundCloud widget does not support playback rate / pitch
       // changes. This is a real platform limitation, not a bug.
     },
+    setPreservesPitch() {
+      // No-op: there's no pitch/tempo control to keylock in the first place.
+    },
     getCurrentTime() {
       return cachedCurrentTime
     },

@@ -59,7 +59,13 @@ export interface DeckState {
   pitchRangePercent: 8 | 16 | 50
   crossfaderAssign: CrossfaderAssign
   cuePointSec: number
+  /** Up to HOT_CUE_COUNT saved positions, like hardware hot cue pads. null slot = unset. */
+  hotCues: (number | null)[]
   loop: { startSec: number; endSec: number } | null
+  /** Master Tempo / keylock: when true, pitch-fader speed changes don't change the audio's pitch. No-op for streaming decks. */
+  keylock: boolean
+  /** Sound Color FX knob: 0 = flat/off, -1..0 sweeps a low-pass filter in, 0..1 sweeps a high-pass filter in. No-op for streaming decks. */
+  colorFx: number
   /** True while the deck's audio graph supports EQ/filters (file & dropbox sources). */
   supportsEQ: boolean
   /** True while the deck's audio graph supports waveform + BPM analysis. */
@@ -68,12 +74,24 @@ export interface DeckState {
   error?: string
 }
 
+export const HOT_CUE_COUNT = 4
+
+export type BeatFxType = 'off' | 'echo' | 'flanger' | 'reverb'
+
+export interface BeatFxState {
+  type: BeatFxType
+  /** Wet mix 0..1. Ignored (fully dry) when type is 'off'. */
+  mix: number
+}
+
 export interface MixerState {
   /** 0 = full channel A side, 1 = full channel B side. */
   crossfader: number
   masterVolume: number
   /** cut/boost curve steepness is fixed; this only toggles which decks are audible via PFL headphone cue (UI-only, no real audio routing). */
   cueDeckIds: DeckId[]
+  /** Shared master Beat FX unit (echo/flanger/reverb), applied post-crossfader like on real hardware. */
+  beatFx: BeatFxState
 }
 
 /** Unified control surface every deck's playback backend must implement. */
@@ -86,6 +104,8 @@ export interface DeckController {
   /** 0..1 linear volume as perceived loudness (implementations may apply their own curve). */
   setVolume(v: number): void
   setPlaybackRate(rate: number): void
+  /** Master Tempo / keylock. No-op for streaming controllers (Spotify/SoundCloud have no such control). */
+  setPreservesPitch(enabled: boolean): void
   getCurrentTime(): number
   getDuration(): number
   /** EQ is a no-op for streaming-only controllers (SoundCloud/Spotify). */

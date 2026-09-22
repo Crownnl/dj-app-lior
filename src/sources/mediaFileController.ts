@@ -85,6 +85,14 @@ export function createMediaFileController(deckId: DeckId, engineCtx: AudioEngine
     setPlaybackRate(rate: number) {
       audio.playbackRate = rate
     },
+    setPreservesPitch(enabled: boolean) {
+      // Master Tempo / keylock: standardized as `preservesPitch`, still vendor
+      // prefixed on some engines, so set every spelling that exists.
+      const el = audio as HTMLAudioElement & { mozPreservesPitch?: boolean; webkitPreservesPitch?: boolean }
+      el.preservesPitch = enabled
+      el.mozPreservesPitch = enabled
+      el.webkitPreservesPitch = enabled
+    },
     getCurrentTime() {
       return audio.currentTime
     },

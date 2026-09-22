@@ -25,6 +25,27 @@
   --color-wave-playhead: #ffffff;
   --color-wave-track: #1a1d26;
 
+  /* Hot cue pad palette, one per slot (HOT_CUE_COUNT = 4 in src/types). */
+  --color-hotcue-1: #ff4d4d;
+  --color-hotcue-2: #ff9c3d;
+  --color-hotcue-3: #4ade80;
+  --color-hotcue-4: #4f8fff;
+
+  /* VU / level meter segments, bottom to top. */
+  --color-meter-low: #4ade80;
+  --color-meter-mid: #ffd23f;
+  --color-meter-high: #ff4d4d;
+
+  /* Brushed-metal hardware-controller surfaces (jog wheel, chassis panels) —
+     distinct from the flatter --color-bg-* panel tokens used by plain UI
+     chrome (library, settings). */
+  --color-metal-dark: #202226;
+  --color-metal: #2c2f34;
+  --color-metal-light: #3a3d43;
+  --color-metal-highlight: #6b7078;
+  --color-jogwheel: #16171a;
+  --color-jogwheel-ring: #55585f;
+
   --radius-sm: 4px;
   --radius-md: 8px;
   --radius-lg: 14px;

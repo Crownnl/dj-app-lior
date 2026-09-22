@@ -1,0 +1,101 @@
+/* BeatFxUnit.module.css — only the parts that are genuinely new for the
+   shared master Beat FX unit (type-selector buttons + on/off, unit chrome).
+   The mix knob itself reuses .knob/.knobWrap/.knobLabel from Mixer.module.css,
+   and the narrow/compact breakpoints below mirror Mixer.module.css's exact
+   media queries so this unit shrinks in step with the rest of the mixer. */
+
+.unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex: 0 0 auto;
+  padding: 6px 6px 5px;
+  background: var(--color-bg-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.unitLabel {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: var(--color-text-faint);
+}
+
+/* ---- type selector (ECHO / FLANGER / REVERB), click active again to turn off ---- */
+
+.typeGroup {
+  display: flex;
+  gap: 3px;
+}
+
+.typeBtn {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  letter-spacing: 0.02em;
+  padding: 3px 6px;
+  background: var(--color-bg-inset);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-dim);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.typeBtn:hover {
+  color: var(--color-text);
+}
+
+.typeBtn:active {
+  transform: translateY(1px);
+}
+
+.typeBtnActive {
+  background: var(--color-bg-panel);
+  color: var(--color-text);
+  border-color: var(--color-text-dim);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* ---- Narrow width (portrait phone / small tablet) ---- */
+@media (max-width: 700px) and (min-height: 481px) {
+  .unit {
+    gap: 3px;
+    padding: 4px 4px 4px;
+  }
+
+  .unitLabel {
+    font-size: 8px;
+  }
+
+  .typeGroup {
+    gap: 2px;
+  }
+
+  .typeBtn {
+    font-size: 8px;
+    padding: 2px 5px;
+  }
+}
+
+/* ---- Compact / phone-landscape (short viewport): labels shrink to short
+   codes, controls stay tappable, matching the rest of the Mixer. ---- */
+@media (max-height: 480px) {
+  .unit {
+    gap: 1px;
+    padding: 2px 2px 1px;
+  }
+
+  .unitLabel {
+    font-size: 6px;
+  }
+
+  .typeGroup {
+    gap: 1px;
+  }
+
+  .typeBtn {
+    font-size: 6px;
+    padding: 1px 3px;
+  }
+}

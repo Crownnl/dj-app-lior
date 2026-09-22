@@ -1,0 +1,74 @@
+/* VUMeter.module.css — slim LED-segment level meter, shared by per-channel
+   and master use (see VUMeter.tsx). Sized to sit alongside the knobs/fader
+   in a narrow channel strip; segments fill available height via flex. */
+
+.meter {
+  display: flex;
+  flex-direction: column-reverse; /* index 0 = bottom segment (low zone) */
+  align-items: stretch;
+  gap: 2px;
+  width: 10px;
+  height: 100%;
+  min-height: 0;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  padding: 2px;
+  background: var(--color-bg-inset);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+}
+
+.segment {
+  flex: 1 1 0;
+  min-height: 1px;
+  border-radius: 1px;
+  /* Dimmed rather than invisible when unlit, so segment positions (and the
+     zone boundaries) stay visible even at zero signal. */
+  opacity: 0.28;
+  transition: opacity 60ms linear;
+}
+
+.lit {
+  opacity: 1;
+}
+
+.segmentLow {
+  background: var(--color-meter-low);
+}
+
+.segmentMid {
+  background: var(--color-meter-mid);
+}
+
+.segmentHigh {
+  background: var(--color-meter-high);
+}
+
+/* A little glow on the hot/clipping zone once lit, like a real meter's red LEDs. */
+.segmentHigh.lit {
+  box-shadow: 0 0 3px var(--color-meter-high);
+}
+
+/* ---- Narrow width (portrait phone / small tablet) — same breakpoint as
+   Mixer.module.css, so this shrinks in step with the rest of the strip. ---- */
+@media (max-width: 700px) and (min-height: 481px) {
+  .meter {
+    width: 8px;
+    gap: 1.5px;
+    padding: 1.5px;
+  }
+}
+
+/* ---- Compact / phone-landscape (short viewport) — same breakpoint as
+   Mixer.module.css. ---- */
+@media (max-height: 480px) {
+  .meter {
+    width: 6px;
+    gap: 1px;
+    padding: 1px;
+  }
+
+  .segment {
+    border-radius: 0.5px;
+  }
+}

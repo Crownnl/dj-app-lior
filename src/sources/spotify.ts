@@ -324,6 +324,9 @@ export function createSpotifyController(deckId: DeckId, _ctx: AudioEngineContext
       // No-op: Spotify's Web Playback SDK has no tempo/pitch control (a real
       // platform limitation, not an oversight).
     },
+    setPreservesPitch() {
+      // No-op: there's no pitch/tempo control to keylock in the first place.
+    },
     getCurrentTime() {
       return computeCurrentSeconds()
     },

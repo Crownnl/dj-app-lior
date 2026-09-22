@@ -1,7 +1,8 @@
 import { create } from 'zustand'
 import { audioEngine, SupersededLoadError } from '../engine/AudioEngine'
 import { analyzeAudio } from '../engine/analysis'
-import type { CrossfaderAssign, DeckId, DeckState, EQBand, MixerState, Track } from '../types'
+import { HOT_CUE_COUNT } from '../types'
+import type { BeatFxType, CrossfaderAssign, DeckId, DeckState, EQBand, MixerState, Track } from '../types'
 
 const ALL_DECK_IDS: DeckId[] = [0, 1, 2, 3]
 // A loop with endSec <= startSec would make the onTimeUpdate loop check
@@ -26,7 +27,10 @@ function makeInitialDeck(id: DeckId): DeckState {
     pitchRangePercent: 8,
     crossfaderAssign: id % 2 === 0 ? 'A' : 'B',
     cuePointSec: 0,
+    hotCues: new Array(HOT_CUE_COUNT).fill(null),
     loop: null,
+    keylock: false,
+    colorFx: 0,
     supportsEQ: true,
     supportsAnalysis: true,
     isLoading: false,
@@ -52,21 +56,34 @@ interface DjStore {
   setCue(deckId: DeckId): void
   jumpToCue(deckId: DeckId): void
 
+  /** Tap a hot cue pad: sets it (if empty) or jumps to it (if already set). */
+  triggerHotCue(deckId: DeckId, slot: number): void
+  clearHotCue(deckId: DeckId, slot: number): void
+
   setDeckVolume(deckId: DeckId, v: number): void
   setGainTrim(deckId: DeckId, v: number): void
   setEQ(deckId: DeckId, band: EQBand, v: number): void
   setPitchPercent(deckId: DeckId, percent: number): void
   setPitchRange(deckId: DeckId, range: 8 | 16 | 50): void
   toggleSync(deckId: DeckId): void
+  setKeylock(deckId: DeckId, enabled: boolean): void
+  setColorFx(deckId: DeckId, value: number): void
 
   setLoopIn(deckId: DeckId): void
   setLoopOut(deckId: DeckId): void
   clearLoop(deckId: DeckId): void
+  /** Sets a fixed-length loop of `beats` beats starting at the current position, using the track's BPM. No-op if BPM isn't known yet. */
+  setBeatLoop(deckId: DeckId, beats: number): void
+  halveLoop(deckId: DeckId): void
+  doubleLoop(deckId: DeckId): void
+  /** Jumps forward/back by `beats` beats (negative = back), using the track's BPM. No-op if BPM isn't known yet. */
+  beatJump(deckId: DeckId, beats: number): void
 
   setCrossfader(v: number): void
   setCrossfaderAssign(deckId: DeckId, assign: CrossfaderAssign): void
   setMasterVolume(v: number): void
   toggleCue(deckId: DeckId): void
+  setBeatFx(type: BeatFxType, mix: number): void
 }
 
 export const useDjStore = create<DjStore>((set, get) => ({
@@ -81,6 +98,7 @@ export const useDjStore = create<DjStore>((set, get) => ({
     crossfader: 0.5,
     masterVolume: 0.85,
     cueDeckIds: [],
+    beatFx: { type: 'off', mix: 0.5 },
   },
   library: [],
 
@@ -170,6 +188,8 @@ export const useDjStore = create<DjStore>((set, get) => ({
       audioEngine.setDeckEQ(deckId, 'high', deck.eq.high)
       audioEngine.setCrossfaderAssign(deckId, deck.crossfaderAssign)
       audioEngine.setPitch(deckId, deck.pitch)
+      audioEngine.setKeylock(deckId, deck.keylock)
+      audioEngine.setColorFx(deckId, deck.colorFx)
 
       set((state) => ({
         decks: {
@@ -181,6 +201,7 @@ export const useDjStore = create<DjStore>((set, get) => ({
             isPlaying: false,
             currentTime: 0,
             cuePointSec: 0,
+            hotCues: new Array(HOT_CUE_COUNT).fill(null),
             loop: null,
             supportsEQ: controller.supportsEQ,
             supportsAnalysis: controller.supportsAnalysis,
@@ -232,6 +253,27 @@ export const useDjStore = create<DjStore>((set, get) => ({
   jumpToCue(deckId) {
     const deck = get().decks[deckId]
     get().seek(deckId, deck.cuePointSec)
+  },
+
+  triggerHotCue(deckId, slot) {
+    const deck = get().decks[deckId]
+    if (!deck.track) return
+    const existing = deck.hotCues[slot]
+    if (existing == null) {
+      const hotCues = [...deck.hotCues]
+      hotCues[slot] = deck.currentTime
+      set((state) => ({ decks: { ...state.decks, [deckId]: { ...state.decks[deckId], hotCues } } }))
+    } else {
+      get().seek(deckId, existing)
+    }
+  },
+
+  clearHotCue(deckId, slot) {
+    set((state) => {
+      const hotCues = [...state.decks[deckId].hotCues]
+      hotCues[slot] = null
+      return { decks: { ...state.decks, [deckId]: { ...state.decks[deckId], hotCues } } }
+    })
   },
 
   setDeckVolume(deckId, v) {
@@ -286,6 +328,16 @@ export const useDjStore = create<DjStore>((set, get) => ({
     set((state) => ({ decks: { ...state.decks, [deckId]: { ...state.decks[deckId], pitch: clampedRate } } }))
   },
 
+  setKeylock(deckId, enabled) {
+    audioEngine.setKeylock(deckId, enabled)
+    set((state) => ({ decks: { ...state.decks, [deckId]: { ...state.decks[deckId], keylock: enabled } } }))
+  },
+
+  setColorFx(deckId, value) {
+    audioEngine.setColorFx(deckId, value)
+    set((state) => ({ decks: { ...state.decks, [deckId]: { ...state.decks[deckId], colorFx: value } } }))
+  },
+
   setLoopIn(deckId) {
     const deck = get().decks[deckId]
     const startSec = deck.currentTime
@@ -317,6 +369,39 @@ export const useDjStore = create<DjStore>((set, get) => ({
     set((state) => ({ decks: { ...state.decks, [deckId]: { ...state.decks[deckId], loop: null } } }))
   },
 
+  setBeatLoop(deckId, beats) {
+    const deck = get().decks[deckId]
+    if (!deck.track?.bpm) return
+    const secPerBeat = 60 / deck.track.bpm
+    const startSec = deck.currentTime
+    const endSec = Math.max(startSec + secPerBeat * beats, startSec + MIN_LOOP_LENGTH_SEC)
+    set((state) => ({ decks: { ...state.decks, [deckId]: { ...state.decks[deckId], loop: { startSec, endSec } } } }))
+  },
+
+  halveLoop(deckId) {
+    const deck = get().decks[deckId]
+    if (!deck.loop) return
+    const { startSec, endSec } = deck.loop
+    const newEnd = Math.max(startSec + MIN_LOOP_LENGTH_SEC, startSec + (endSec - startSec) / 2)
+    set((state) => ({ decks: { ...state.decks, [deckId]: { ...state.decks[deckId], loop: { startSec, endSec: newEnd } } } }))
+  },
+
+  doubleLoop(deckId) {
+    const deck = get().decks[deckId]
+    if (!deck.loop) return
+    const { startSec, endSec } = deck.loop
+    const newEnd = startSec + (endSec - startSec) * 2
+    set((state) => ({ decks: { ...state.decks, [deckId]: { ...state.decks[deckId], loop: { startSec, endSec: newEnd } } } }))
+  },
+
+  beatJump(deckId, beats) {
+    const deck = get().decks[deckId]
+    if (!deck.track?.bpm) return
+    const secPerBeat = 60 / deck.track.bpm
+    const target = Math.min(deck.durationSec || Infinity, Math.max(0, deck.currentTime + secPerBeat * beats))
+    get().seek(deckId, target)
+  },
+
   setCrossfader(v) {
     audioEngine.setCrossfader(v)
     set((state) => ({ mixer: { ...state.mixer, crossfader: v } }))
@@ -341,5 +426,10 @@ export const useDjStore = create<DjStore>((set, get) => ({
           : [...state.mixer.cueDeckIds, deckId],
       },
     }))
+  },
+
+  setBeatFx(type, mix) {
+    audioEngine.setBeatFx(type, mix)
+    set((state) => ({ mixer: { ...state.mixer, beatFx: { type, mix } } }))
   },
 }))
