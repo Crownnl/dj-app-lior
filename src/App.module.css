@@ -17,7 +17,7 @@
   grid-template-columns: repeat(2, 1fr);
   gap: 8px;
   flex: 0 0 auto;
-  height: 340px;
+  height: 460px;
 }
 
 .decksFour {
@@ -26,7 +26,7 @@
 
 .mixerArea {
   flex: 0 0 auto;
-  height: 400px;
+  height: 480px;
   min-height: 0;
 }
 
@@ -77,12 +77,12 @@
   }
 
   .decks {
-    height: 168px;
+    height: 256px;
     gap: 6px;
   }
 
   .mixerArea {
-    height: 176px;
+    height: 220px;
   }
 
   .libraryArea {

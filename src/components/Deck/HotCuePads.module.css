@@ -1,0 +1,173 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.padsRow {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+}
+
+.pad {
+  flex: 1 1 0;
+  max-width: 56px;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--pad-color);
+  background: var(--color-bg-inset);
+  border: 1px solid var(--pad-color);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.pad:nth-child(1) {
+  --pad-color: var(--color-hotcue-1);
+}
+
+.pad:nth-child(2) {
+  --pad-color: var(--color-hotcue-2);
+}
+
+.pad:nth-child(3) {
+  --pad-color: var(--color-hotcue-3);
+}
+
+.pad:nth-child(4) {
+  --pad-color: var(--color-hotcue-4);
+}
+
+.pad:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.pad:not(:disabled):active {
+  transform: translateY(1px);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+}
+
+/* Set = filled/lit with the pad color; unset stays dark with just the
+   colored border/digit so "armed" pads are unmistakable at a glance. */
+.padSet {
+  background: var(--pad-color);
+  border-color: var(--pad-color);
+  color: var(--color-bg-inset);
+  box-shadow: 0 0 5px var(--pad-color);
+}
+
+.padSet:not(:disabled):active {
+  box-shadow:
+    inset 0 1px 3px rgba(0, 0, 0, 0.5),
+    0 0 5px var(--pad-color);
+}
+
+.loopRow {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.group {
+  display: flex;
+  gap: 3px;
+}
+
+.divider {
+  width: 1px;
+  align-self: stretch;
+  background: var(--color-border);
+  flex-shrink: 0;
+}
+
+.smallButton {
+  flex: 1;
+  min-width: 0;
+  height: 22px;
+  padding: 0 4px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--color-text-dim);
+  background: var(--color-bg-inset);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.smallButton:disabled {
+  color: var(--color-text-faint);
+  cursor: default;
+  opacity: 0.5;
+}
+
+.smallButton:not(:disabled):active {
+  background: var(--color-bg-raised);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+  transform: translateY(1px);
+}
+
+/* Narrow width (phone portrait / small tablet) — shrink pads and buttons so
+   the dense beat-loop/jump row keeps its three groups on one line. */
+@media (max-width: 700px) and (min-height: 481px) {
+  .padsRow {
+    gap: 4px;
+  }
+
+  .pad {
+    font-size: 12px;
+  }
+
+  .loopRow {
+    gap: 4px;
+  }
+
+  .group {
+    gap: 2px;
+  }
+
+  .smallButton {
+    height: 20px;
+    padding: 0 3px;
+    font-size: 9px;
+  }
+}
+
+/* Compact / phone-landscape: same ~160-170px total panel height budget as
+   the rest of the deck (see Deck.module.css) — shrink pads/buttons further
+   so the panel still fits without clipping or overlapping the row below. */
+@media (max-height: 480px) {
+  .panel {
+    gap: 3px;
+  }
+
+  .padsRow {
+    gap: 3px;
+  }
+
+  .pad {
+    font-size: 10px;
+    border-width: 1px;
+  }
+
+  .loopRow {
+    gap: 3px;
+  }
+
+  .group {
+    gap: 2px;
+  }
+
+  .smallButton {
+    height: 16px;
+    padding: 0 2px;
+    font-size: 8px;
+  }
+}

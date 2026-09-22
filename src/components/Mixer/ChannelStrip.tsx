@@ -2,6 +2,8 @@ import { useDjStore } from '../../store/useDjStore'
 import type { CrossfaderAssign, DeckId } from '../../types'
 import { useDragKnob } from './useDragKnob'
 import EQKnob from './EQKnob'
+import ColorFxKnob from './ColorFxKnob'
+import VUMeter from './VUMeter'
 import styles from './Mixer.module.css'
 
 const ASSIGN_OPTIONS: CrossfaderAssign[] = ['A', 'THRU', 'B']
@@ -77,6 +79,8 @@ export default function ChannelStrip({ deckId }: { deckId: DeckId }) {
         <EQKnob deckId={deckId} band="low" />
       </div>
 
+      <ColorFxKnob deckId={deckId} />
+
       <div className={styles.assignGroup} role="group" aria-label="Crossfader assignment">
         {ASSIGN_OPTIONS.map((option) => (
           <button
@@ -91,17 +95,20 @@ export default function ChannelStrip({ deckId }: { deckId: DeckId }) {
         ))}
       </div>
 
-      <div className={styles.faderArea}>
-        <input
-          type="range"
-          className={styles.volumeFaderInput}
-          min={0}
-          max={1}
-          step={0.01}
-          value={deck.volume}
-          onChange={(e) => setDeckVolume(deckId, Number(e.target.value))}
-          aria-label={`Channel ${deckId + 1} volume`}
-        />
+      <div className={styles.faderRow}>
+        <VUMeter deckId={deckId} />
+        <div className={styles.faderArea}>
+          <input
+            type="range"
+            className={styles.volumeFaderInput}
+            min={0}
+            max={1}
+            step={0.01}
+            value={deck.volume}
+            onChange={(e) => setDeckVolume(deckId, Number(e.target.value))}
+            aria-label={`Channel ${deckId + 1} volume`}
+          />
+        </div>
       </div>
 
       <button

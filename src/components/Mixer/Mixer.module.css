@@ -242,7 +242,16 @@
   color: var(--color-accent-b);
 }
 
-/* ---- vertical channel/master fader ---- */
+/* ---- vertical channel/master fader (+ its VU meter) ---- */
+
+.faderRow {
+  display: flex;
+  flex: 1;
+  width: 100%;
+  min-height: 0;
+  gap: 4px;
+  justify-content: center;
+}
 
 .faderArea {
   flex: 1;

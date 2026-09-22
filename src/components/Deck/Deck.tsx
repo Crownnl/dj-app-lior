@@ -2,6 +2,8 @@ import { useDjStore } from '../../store/useDjStore'
 import type { DeckId, SourceKind } from '../../types'
 import Waveform from './Waveform'
 import PitchFader from './PitchFader'
+import JogWheel from './JogWheel'
+import HotCuePads from './HotCuePads'
 import styles from './Deck.module.css'
 
 interface Props {
@@ -32,6 +34,7 @@ export default function Deck({ deckId }: Props) {
   const setLoopIn = useDjStore((s) => s.setLoopIn)
   const setLoopOut = useDjStore((s) => s.setLoopOut)
   const clearLoop = useDjStore((s) => s.clearLoop)
+  const setKeylock = useDjStore((s) => s.setKeylock)
 
   const track = deck.track
   const remaining = Math.max(0, deck.durationSec - deck.currentTime)
@@ -71,6 +74,24 @@ export default function Deck({ deckId }: Props) {
       <div className={styles.timeRow}>
         <span>{formatTime(deck.currentTime)}</span>
         <span>-{formatTime(remaining)}</span>
+      </div>
+
+      <div className={styles.jogRow}>
+        <div className={styles.jogWheelWrap}>
+          <JogWheel deckId={deckId} />
+        </div>
+        <div className={styles.pitchColumn}>
+          <PitchFader deckId={deckId} />
+          <button
+            type="button"
+            className={`${styles.keyButton} ${deck.keylock ? styles.keyButtonActive : ''}`}
+            onClick={() => setKeylock(deckId, !deck.keylock)}
+            disabled={!track}
+            title="Master Tempo (keylock): keep pitch the same while changing speed"
+          >
+            KEY
+          </button>
+        </div>
       </div>
 
       <div className={styles.transportRow}>
@@ -114,9 +135,7 @@ export default function Deck({ deckId }: Props) {
         <span className={deck.loop ? styles.loopIndicatorActive : styles.loopIndicator} />
       </div>
 
-      <div className={styles.bottomRow}>
-        <PitchFader deckId={deckId} />
-      </div>
+      <HotCuePads deckId={deckId} />
 
       {deck.isLoading && <div className={styles.loadingOverlay}>Loading...</div>}
       {deck.error && <div className={styles.error}>{deck.error}</div>}

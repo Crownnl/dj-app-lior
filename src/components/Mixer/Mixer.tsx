@@ -2,6 +2,8 @@ import { useDjStore } from '../../store/useDjStore'
 import type { DeckId } from '../../types'
 import ChannelStrip from './ChannelStrip'
 import Crossfader from './Crossfader'
+import BeatFxUnit from './BeatFxUnit'
+import VUMeter from './VUMeter'
 import styles from './Mixer.module.css'
 
 export default function Mixer() {
@@ -41,22 +43,26 @@ export default function Mixer() {
 
         <div className={styles.masterStrip}>
           <span className={styles.masterLabel}>MASTER</span>
-          <div className={styles.faderArea}>
-            <input
-              type="range"
-              className={styles.masterFaderInput}
-              min={0}
-              max={1}
-              step={0.01}
-              value={masterVolume}
-              onChange={(e) => setMasterVolume(Number(e.target.value))}
-              aria-label="Master volume"
-            />
+          <div className={styles.faderRow}>
+            <VUMeter deckId="master" />
+            <div className={styles.faderArea}>
+              <input
+                type="range"
+                className={styles.masterFaderInput}
+                min={0}
+                max={1}
+                step={0.01}
+                value={masterVolume}
+                onChange={(e) => setMasterVolume(Number(e.target.value))}
+                aria-label="Master volume"
+              />
+            </div>
           </div>
           <span className={styles.masterReadout}>{Math.round(masterVolume * 100)}</span>
         </div>
       </div>
 
+      <BeatFxUnit />
       <Crossfader />
     </div>
   )
